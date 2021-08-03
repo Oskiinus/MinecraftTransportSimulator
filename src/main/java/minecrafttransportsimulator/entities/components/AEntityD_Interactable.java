@@ -275,9 +275,9 @@ public abstract class AEntityD_Interactable<JSONDefinition extends AJSONInteract
 			//Update door boxes.
 			for(Entry<BoundingBox, JSONDoor> doorEntry : doorBoxes.entrySet()){
 				if(variablesOn.contains(doorEntry.getValue().name)){
-					doorEntry.getKey().globalCenter.setTo(doorEntry.getValue().openPos).rotateFine(angles).add(position);
+					angles.rotatePoint(doorEntry.getKey().globalCenter.setTo(doorEntry.getValue().openPos)).add(position);
 				}else{
-					doorEntry.getKey().globalCenter.setTo(doorEntry.getValue().closedPos).rotateFine(angles).add(position);
+					angles.rotatePoint(doorEntry.getKey().globalCenter.setTo(doorEntry.getValue().closedPos)).add(position);
 				}
 			}
 			return true;
@@ -505,10 +505,10 @@ public abstract class AEntityD_Interactable<JSONDefinition extends AJSONInteract
 							if(hookupConnectionGroup.hookup && (hookupGroupIndex == -1 || hookupEntity.definition.connectionGroups.indexOf(hookupConnectionGroup) == hookupGroupIndex)){
 								//We can potentially connect these two entities.  See if we actually can.
 								for(JSONConnection hitchConnection : hitchConnectionGroup.connections){
-									Point3d hitchPos = hitchConnection.pos.copy().rotateCoarse(angles).add(position);
+									Point3d hitchPos = angles.rotatePoint(hitchConnection.pos, new Point3d()).add(position);
 									double maxDistance = hitchConnection.distance > 0 ? hitchConnection.distance : 2;
 									for(JSONConnection hookupConnection : hookupConnectionGroup.connections){
-										Point3d hookupPos = hookupConnection.pos.copy().rotateCoarse(hookupEntity.angles).add(hookupEntity.position);
+										Point3d hookupPos = hookupEntity.angles.rotatePoint(hookupConnection.pos, new Point3d()).add(hookupEntity.position);
 										if(hitchPos.distanceTo(hookupPos) < maxDistance + 10){
 											boolean validType = hitchConnection.type.equals(hookupConnection.type);
 											boolean validDistance = hitchPos.distanceTo(hookupPos) < maxDistance;
@@ -607,6 +607,8 @@ public abstract class AEntityD_Interactable<JSONDefinition extends AJSONInteract
 	 * Helper method for aligning trailer connections.  Used to prevent yaw mis-alignments.
 	 */
 	protected void updateAnglesToTowed(){
+		//FIXME we probably don't need this anymore as this is caused by euler angles.
+		/*
 		//Need to set angles for mounted/restricted connections.
 		if(towedByConnection.hitchConnection.mounted || towedByConnection.hitchConnection.restricted){
 			angles.y = towedByConnection.hitchEntity.angles.y;
@@ -619,7 +621,7 @@ public abstract class AEntityD_Interactable<JSONDefinition extends AJSONInteract
 			for(TrailerConnection trailerConnection : towingConnections){
 				trailerConnection.hookupBaseEntity.updateAnglesToTowed();
 			}
-		}
+		}*/
 	}
 	
 	@Override

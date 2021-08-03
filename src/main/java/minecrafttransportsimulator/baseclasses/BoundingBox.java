@@ -100,7 +100,7 @@ public class BoundingBox{
 		if(optionalOffset != null){
 			globalCenter.add(optionalOffset);
 		}
-		globalCenter.rotateFine(entity.angles).add(entity.position);
+		entity.angles.rotatePoint(globalCenter).add(entity.position);
 		if(isCollision){
 			//Need to round box to prevent floating-point errors.
 			globalCenter.x = ((int) (globalCenter.x/HITBOX_CLAMP))*HITBOX_CLAMP;

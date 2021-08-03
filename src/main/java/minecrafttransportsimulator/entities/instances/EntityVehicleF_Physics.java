@@ -66,6 +66,11 @@ public class EntityVehicleF_Physics extends AEntityVehicleE_Powered{
 	private double currentWingArea;
 	public double trackAngle;
 	private final Set<EntityVehicleF_Physics> towedVehiclesCheckedForWeights = new HashSet<EntityVehicleF_Physics>();
+	private final Point3d hitchRotatedOffset = new Point3d();
+	private final Point3d hookupRotatedOffset = new Point3d();
+	private final Point3d tractorHitchPrevOffsetXZ = new Point3d();
+	private final Point3d tractorHitchCurrentOffsetXZ = new Point3d();
+	private final Point3d tractorHitchCurrentOffset = new Point3d();
 	
 	//Coefficients.
 	private double wingLiftCoeff;
@@ -380,19 +385,20 @@ public class EntityVehicleF_Physics extends AEntityVehicleE_Powered{
 			//If we are a trailer that is mounted, just move the vehicle to the exact position of the trailer connection.
 			//Otherwise, do movement logic  Make sure the towed vehicle is loaded, however.  It may not yet be.
 			if(towedByConnection.hitchConnection.mounted){
-				Point3d hitchRotatedOffset = towedByConnection.getHitchCurrentPosition();
-				Point3d hookupRotatedOffset = towedByConnection.getHookupCurrentPosition();
+				towedByConnection.setToHitchCurrentPosition(hitchRotatedOffset);
+				towedByConnection.setToHookupCurrentPosition(hookupRotatedOffset);
 				motion.setTo(hitchRotatedOffset).subtract(hookupRotatedOffset).multiply(1/SPEED_FACTOR);
+				//FIXME this may be wrong?
 				//TODO whatever maths we apply to the part rendering we need to apply here.
-				rotation.setTo(towedByConnection.hitchEntity.angles).add(towedByConnection.hitchConnection.rot).subtract(angles);
+				rotation.setTo(towedByConnection.hitchEntity.angles).rotateByOrientation(towedByConnection.hitchConnection.rot, rotation);
 			}else{
 				//Need to apply both motion to move the trailer, and yaw to adjust the trailer's angle relative to the truck.
 				//Yaw is applied based on the current and next position of the truck's hookup.
 				//Motion is applied after yaw corrections to ensure the trailer follows the truck.
 				//Start by getting the hitch offsets.  We save the current offset as we'll change it for angle calculations.
-				Point3d tractorHitchPrevOffsetXZ = towedByConnection.getHitchPrevPosition().subtract(prevPosition);
-				Point3d tractorHitchCurrentOffsetXZ = towedByConnection.getHitchCurrentPosition().subtract(position);
-				Point3d tractorHitchCurrentOffset = tractorHitchCurrentOffsetXZ.copy();
+				towedByConnection.setToHitchPrevPosition(tractorHitchPrevOffsetXZ).subtract(prevPosition);
+				towedByConnection.setToHitchCurrentPosition(tractorHitchCurrentOffsetXZ).subtract(position);
+				tractorHitchCurrentOffset.setTo(tractorHitchCurrentOffsetXZ);
 				
 				//Calculate how much yaw we need to apply to rotate the trailer.
 				//This is only done for the X and Z motions.

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import minecrafttransportsimulator.baseclasses.Orientation3d;
 import minecrafttransportsimulator.baseclasses.Point3d;
 import minecrafttransportsimulator.entities.instances.APart;
 import minecrafttransportsimulator.entities.instances.EntityParticle;
@@ -113,7 +114,7 @@ public abstract class AEntityC_Definable<JSONDefinition extends AJSONMultiModelP
 	}
 	
 	/**Constructor for un-synced entities.  Allows for specification of position/motion/angles.**/
-	public AEntityC_Definable(WrapperWorld world, Point3d position, Point3d motion, Point3d angles, AItemSubTyped<JSONDefinition> creatingItem){
+	public AEntityC_Definable(WrapperWorld world, Point3d position, Point3d motion, Orientation3d angles, AItemSubTyped<JSONDefinition> creatingItem){
 		super(world, position, motion, angles);
 		this.subName = creatingItem.subName;
 		this.definition = creatingItem.definition;
@@ -561,7 +562,7 @@ public abstract class AEntityC_Definable<JSONDefinition extends AJSONMultiModelP
 	 */
 	private static double clampAndScale(double value, JSONAnimationDefinition animation, double offset){
 		if(animation.axis != null){
-			value = animation.axis.length()*(animation.absolute ? Math.abs(value) : value) + animation.offset + offset;
+			value = animation.axis.rotation*(animation.absolute ? Math.abs(value) : value) + animation.offset + offset;
 			if(animation.clampMin != 0 && value < animation.clampMin){
 				value = animation.clampMin;
 			}else if(animation.clampMax != 0 && value > animation.clampMax){
@@ -716,23 +717,15 @@ public abstract class AEntityC_Definable<JSONDefinition extends AJSONMultiModelP
 						case TRANSLATION :{
 							if(!inhibitAnimations){
 								definedVolume = true;
-								sound.volume += Math.signum(clock.animation.axis.y)*getAnimatedVariableValue(clock, -clock.animation.offset, 0) + clock.animation.offset;
+								sound.volume += Math.signum(clock.animation.axis.axis.y)*getAnimatedVariableValue(clock, -clock.animation.offset, 0) + clock.animation.offset;
 							}
 							break;
 						}
 						case ROTATION :{
 							if(!inhibitAnimations){
 								definedVolume = true;
-								//Need to parse out parabola params here to not upset the axis calcs.
-								double parabolaParamA = clock.animation.axis.x;
-								clock.animation.axis.x = 0;
-								double parabolaParamH = clock.animation.axis.z;
-								clock.animation.axis.z = 0;
-								double parabolaValue = Math.signum(clock.animation.axis.y)*getAnimatedVariableValue(clock, -clock.animation.offset, 0);
-								sound.volume += parabolaParamA*Math.pow(parabolaValue - parabolaParamH, 2) + clock.animation.offset;
-								
-								clock.animation.axis.x = parabolaParamA;
-								clock.animation.axis.z = parabolaParamH;
+								double parabolaValue = Math.signum(clock.animation.axis.axis.y)*getAnimatedVariableValue(clock, -clock.animation.offset, 0);
+								sound.volume += clock.animation.axis.axis.x*Math.pow(parabolaValue - clock.animation.axis.axis.z, 2) + clock.animation.offset;
 							}
 							break;
 						}
@@ -785,23 +778,15 @@ public abstract class AEntityC_Definable<JSONDefinition extends AJSONMultiModelP
 						case TRANSLATION :{
 							if(!inhibitAnimations){
 								definedPitch = true;
-								sound.pitch += Math.signum(clock.animation.axis.y)*getAnimatedVariableValue(clock, -clock.animation.offset, 0) + clock.animation.offset;
+								sound.pitch += Math.signum(clock.animation.axis.axis.y)*getAnimatedVariableValue(clock, -clock.animation.offset, 0) + clock.animation.offset;
 							}
 							break;
 						}
 						case ROTATION :{
 							if(!inhibitAnimations){
 								definedPitch = true;
-								//Need to parse out parabola params here to not upset the axis calcs.
-								double parabolaParamA = clock.animation.axis.x;
-								clock.animation.axis.x = 0;
-								double parabolaParamH = clock.animation.axis.z;
-								clock.animation.axis.z = 0;
-								double parabolaValue = Math.signum(clock.animation.axis.y)*getAnimatedVariableValue(clock, -clock.animation.offset, 0);
-								sound.pitch += parabolaParamA*Math.pow(parabolaValue - parabolaParamH, 2) + clock.animation.offset;
-								
-								clock.animation.axis.x = parabolaParamA;
-								clock.animation.axis.z = parabolaParamH;
+								double parabolaValue = Math.signum(clock.animation.axis.axis.y)*getAnimatedVariableValue(clock, -clock.animation.offset, 0);
+								sound.pitch += clock.animation.axis.axis.x*Math.pow(parabolaValue - clock.animation.axis.axis.z, 2) + clock.animation.offset;
 							}
 							break;
 						}

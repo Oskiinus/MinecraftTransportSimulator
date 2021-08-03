@@ -5,6 +5,7 @@ import java.util.List;
 
 import minecrafttransportsimulator.baseclasses.BoundingBox;
 import minecrafttransportsimulator.baseclasses.Point3d;
+import minecrafttransportsimulator.baseclasses.Orientation3d;
 import minecrafttransportsimulator.mcinterface.WrapperNBT;
 import minecrafttransportsimulator.mcinterface.WrapperWorld;
 import minecrafttransportsimulator.sound.Radio;
@@ -24,10 +25,10 @@ public abstract class AEntityB_Existing extends AEntityA_Base{
 	public final Point3d prevPosition;
 	public final Point3d motion;
 	public final Point3d prevMotion;
-	public final Point3d angles;
-	public final Point3d prevAngles;
-	public final Point3d rotation;
-	public final Point3d prevRotation;
+	public final Orientation3d angles;
+	public final Orientation3d prevAngles;
+	public final Orientation3d rotation;
+	public final Orientation3d prevRotation;
 	public BoundingBox boundingBox;
 	public double airDensity;
 	public double velocity;
@@ -43,16 +44,16 @@ public abstract class AEntityB_Existing extends AEntityA_Base{
 		this.prevPosition = position.copy();
 		this.motion = data.getPoint3d("motion");
 		this.prevMotion = motion.copy();
-		this.angles = data.getPoint3d("angles");
+		this.angles = data.getOrientation3d("angles");
 		this.prevAngles = angles.copy();
-		this.rotation = data.getPoint3d("rotation");
+		this.rotation = data.getOrientation3d("rotation");
 		this.prevRotation = rotation.copy();
 		this.boundingBox = new BoundingBox(new Point3d(), position, 0.5, 0.5, 0.5, false, false, false, 0);
 		this.radio = hasRadio() ? new Radio(this, data.getDataOrNew("radio")) : null;
 	}
 	
 	/**Constructor for un-synced entities.  Allows for specification of position/motion/angles.**/
-	public AEntityB_Existing(WrapperWorld world, Point3d position, Point3d motion, Point3d angles){
+	public AEntityB_Existing(WrapperWorld world, Point3d position, Point3d motion, Orientation3d angles){
 		super(world, null);
 		this.position = position.copy();
 		this.prevPosition = position.copy();
@@ -60,7 +61,7 @@ public abstract class AEntityB_Existing extends AEntityA_Base{
 		this.prevMotion = motion.copy();
 		this.angles = angles.copy();
 		this.prevAngles = angles.copy();
-		this.rotation = new Point3d();
+		this.rotation = new Orientation3d();
 		this.prevRotation = rotation.copy();
 		this.boundingBox = new BoundingBox(new Point3d(), position, 0.5, 0.5, 0.5, false, false, false, 0);
 		this.radio = null;
@@ -166,8 +167,8 @@ public abstract class AEntityB_Existing extends AEntityA_Base{
 		if(shouldSavePosition()){
 			data.setPoint3d("position", position);
 			data.setPoint3d("motion", motion);
-			data.setPoint3d("angles", angles);
-			data.setPoint3d("rotation", rotation);
+			data.setOrientation3d("angles", angles);
+			data.setOrientation3d("rotation", rotation);
 		}
 		if(radio != null){
 			data.setData("radio", radio.save(new WrapperNBT()));

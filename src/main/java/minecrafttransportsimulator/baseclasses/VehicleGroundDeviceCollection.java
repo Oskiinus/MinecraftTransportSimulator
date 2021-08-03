@@ -21,6 +21,7 @@ public class VehicleGroundDeviceCollection{
 	private final VehicleGroundDeviceBox frontRightGDB;
 	private final VehicleGroundDeviceBox rearLeftGDB;
 	private final VehicleGroundDeviceBox rearRightGDB;
+	private final Point3d particleSpawnPos = new Point3d();
 	public final Set<PartGroundDevice> groundedGroundDevices = new HashSet<PartGroundDevice>();
 	public final Set<PartGroundDevice> drivenWheels = new HashSet<PartGroundDevice>();
 	

@@ -7,6 +7,8 @@ import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
 
+import minecrafttransportsimulator.baseclasses.Orientation3d;
+import minecrafttransportsimulator.baseclasses.Point3d;
 import minecrafttransportsimulator.entities.components.AEntityC_Definable;
 import minecrafttransportsimulator.entities.instances.PartGroundDevice;
 import minecrafttransportsimulator.jsondefs.JSONAnimatedObject;
@@ -27,6 +29,8 @@ public class RenderableModelObject<AnimationEntity extends AEntityC_Definable<?>
 	private final String objectName;
 	public final String applyAfter;
 	public final int cachedVertexIndex;
+	protected final Point3d position = new Point3d();
+	protected final Orientation3d rotation = new Orientation3d();
 	
 	private static final Map<String, Map<String, Integer>> cachedVertexIndexLists = new HashMap<String, Map<String, Integer>>();
 	

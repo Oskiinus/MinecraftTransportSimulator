@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import minecrafttransportsimulator.baseclasses.Point3d;
+import minecrafttransportsimulator.baseclasses.Orientation3d;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 
@@ -145,6 +146,19 @@ public class WrapperNBT{
 			setPoint3dCompact(name + index++, value);
 		}
 	}
+
+	
+	//Rotation3d
+	public Orientation3d getOrientation3d(String name){
+		return new Orientation3d(getPoint3d(name + "axis"), getDouble(name + "rotation"), getBoolean(name + "usedInRendering"));
+	}
+	
+	public void setOrientation3d(String name, Orientation3d value){
+		setPoint3d(name + "axis", value.axis);
+		setDouble(name + "rotation", value.rotation);
+		setBoolean(name + "usedInRendering", value.buffer != null);
+	}
+	
 	
 	public WrapperNBT getData(String name){
 		return tag.hasKey(name) ? new WrapperNBT(tag.getCompoundTag(name)) : null;

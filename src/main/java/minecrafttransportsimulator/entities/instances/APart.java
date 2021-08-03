@@ -313,7 +313,7 @@ public abstract class APart extends AEntityD_Interactable<JSONPart>{
 							if(!clock.animation.centerPoint.isZero()){
 								//Use the center point as a vector we rotate to get the applied offset.
 								//We need to take into account the rolling rotation here, as we might have rotated on a prior call.
-								localOffset.add(clock.animation.centerPoint.copy().multiply(-1D).rotateFine(appliedRotation).add(clock.animation.centerPoint).rotateFine(localAngles));
+								localOffset.add(clock.animation.centerPoint.copy().invert().rotateFine(appliedRotation).add(clock.animation.centerPoint).rotateFine(localAngles));
 							}
 							
 							//Apply rotation.  We need to do this after translation operations to ensure proper offsets.

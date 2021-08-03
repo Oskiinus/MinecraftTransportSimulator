@@ -119,6 +119,26 @@ public class Point3d{
 	}
 	
 	/**
+	 * Inverts the sign of this point.  Useful when doing backwards subtraction.
+	 * Returns the called object for nested operations.
+	 */
+	public Point3d invert(){
+		this.x = -x;
+		this.y = -y;
+		this.z = -z;
+		return this;
+	}
+	
+	/**
+	 * Sets this point to the interpolated value between the two passed-in points,
+	 * with the value being determined by the distance between them and the passed-in factor.
+	 * Returns the called object for nested operations.
+	 */
+	public Point3d interpolateBetween(Point3d startPoint, Point3d endPoint, double factor){
+		return setTo(endPoint).subtract(startPoint).multiply(factor).add(startPoint);
+	}
+	
+	/**
 	 * Returns the distance between this point and the passed-in point.
 	 */
 	public double distanceTo(Point3d point){
@@ -163,15 +183,6 @@ public class Point3d{
 			z /= length;
 		}
 		return this;
-	}
-	
-	/**
-	 * Returns an interpolated point whose value is between this point and the next point
-	 * with the value being defined by the normalized distance between them and the passed-in
-	 * factor. 
-	 */
-	public Point3d getInterpolatedPoint(Point3d endPoint, double factor){
-		return endPoint.copy().subtract(this).multiply(factor).add(this);
 	}
 	
 	/**

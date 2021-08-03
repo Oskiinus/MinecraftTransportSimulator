@@ -15,6 +15,7 @@ public class TransformRotatable<AnimationEntity extends AEntityC_Definable<?>> e
 	
 	public TransformRotatable(JSONAnimationDefinition definition){
 		super(definition);
+		//FIXME add this to the parser code.
 		//For the axis defined in the JSON, the axis is the normalized value of the defined vector, while the 
 		//rotation magnitude is the magnitude of that vector.
 		this.rotationAxis = definition.axis.copy().normalize();
@@ -23,7 +24,8 @@ public class TransformRotatable<AnimationEntity extends AEntityC_Definable<?>> e
 	@Override
 	public double applyTransform(AnimationEntity entity, boolean blendingEnabled, float partialTicks, double offset){
 		//Get rotation.
-		double rotation = entity.getAnimatedVariableValue(entity.renderAnimationClocks.get(definition), offset, partialTicks);
+		double variableRotation = entity.getAnimatedVariableValue(entity.renderAnimationClocks.get(definition), offset, partialTicks);
+		double netRotation = definition.addPriorOffset ? variableRotation - offset : variableRotation;
 		
 		//Do rotation.
 		if(definition.addPriorOffset){
@@ -35,6 +37,6 @@ public class TransformRotatable<AnimationEntity extends AEntityC_Definable<?>> e
 			GL11.glRotated(rotation, rotationAxis.x, rotationAxis.y, rotationAxis.z);
 			GL11.glTranslated(-definition.centerPoint.x, -definition.centerPoint.y, -definition.centerPoint.z);
 		}
-		return rotation;
+		return variableRotation;
 	}
 }
