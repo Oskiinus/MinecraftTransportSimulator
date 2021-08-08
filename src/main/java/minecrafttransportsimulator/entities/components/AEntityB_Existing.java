@@ -19,16 +19,17 @@ import minecrafttransportsimulator.sound.SoundInstance;
  * @author don_bruce
  */
 public abstract class AEntityB_Existing extends AEntityA_Base{
-	protected static final Point3d ZERO_FOR_CONSTRUCTOR = new Point3d();
+	protected static final Point3d ZERO_POSITION_FOR_CONSTRUCTOR = new Point3d();
+	protected static final Orientation3d ZERO_ORIENTATION_FOR_CONSTRUCTOR = new Orientation3d();
 	
 	public final Point3d position;
 	public final Point3d prevPosition;
 	public final Point3d motion;
 	public final Point3d prevMotion;
-	public final Orientation3d angles;
-	public final Orientation3d prevAngles;
-	public final Orientation3d rotation;
-	public final Orientation3d prevRotation;
+	public final Orientation3d orientation;
+	public final Orientation3d prevOrientation;
+	public final Point3d rotation;
+	public final Point3d prevRotation;
 	public BoundingBox boundingBox;
 	public double airDensity;
 	public double velocity;
@@ -44,9 +45,9 @@ public abstract class AEntityB_Existing extends AEntityA_Base{
 		this.prevPosition = position.copy();
 		this.motion = data.getPoint3d("motion");
 		this.prevMotion = motion.copy();
-		this.angles = data.getOrientation3d("angles");
-		this.prevAngles = angles.copy();
-		this.rotation = data.getOrientation3d("rotation");
+		this.orientation = data.getOrientation3d("orientation");
+		this.prevOrientation = new Orientation3d().setTo(orientation);
+		this.rotation = data.getPoint3d("rotation");
 		this.prevRotation = rotation.copy();
 		this.boundingBox = new BoundingBox(new Point3d(), position, 0.5, 0.5, 0.5, false, false, false, 0);
 		this.radio = hasRadio() ? new Radio(this, data.getDataOrNew("radio")) : null;
@@ -59,9 +60,9 @@ public abstract class AEntityB_Existing extends AEntityA_Base{
 		this.prevPosition = position.copy();
 		this.motion = motion.copy();
 		this.prevMotion = motion.copy();
-		this.angles = angles.copy();
-		this.prevAngles = angles.copy();
-		this.rotation = new Orientation3d();
+		this.orientation = new Orientation3d().setTo(angles);
+		this.prevOrientation = new Orientation3d().setTo(angles);
+		this.rotation = new Point3d();
 		this.prevRotation = rotation.copy();
 		this.boundingBox = new BoundingBox(new Point3d(), position, 0.5, 0.5, 0.5, false, false, false, 0);
 		this.radio = null;
@@ -75,8 +76,7 @@ public abstract class AEntityB_Existing extends AEntityA_Base{
 			}
 			prevPosition.setTo(position);
 			prevMotion.setTo(motion);
-			prevAngles.setTo(angles);
-			prevRotation.setTo(rotation);
+			prevOrientation.setTo(orientation);
 			airDensity = 1.225*Math.pow(2, -position.y/(500D*world.getMaxHeight()/256D));
 			velocity = motion.length();
 			return true;
@@ -167,8 +167,8 @@ public abstract class AEntityB_Existing extends AEntityA_Base{
 		if(shouldSavePosition()){
 			data.setPoint3d("position", position);
 			data.setPoint3d("motion", motion);
-			data.setOrientation3d("angles", angles);
-			data.setOrientation3d("rotation", rotation);
+			data.setOrientation3d("angles", orientation);
+			data.setPoint3d("rotation", rotation);
 		}
 		if(radio != null){
 			data.setData("radio", radio.save(new WrapperNBT()));

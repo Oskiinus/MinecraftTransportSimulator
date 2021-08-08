@@ -81,13 +81,13 @@ public class TileEntityPole extends ATileEntityBase<JSONPoleComponent> implement
 					component.update();
 					if(axis.equals(Axis.NONE)){
 						component.position.setTo(position);
-						component.angles.setTo(angles);
+						component.orientation.setTo(orientation);
 					}else{
 						component.position.set(0, 0, definition.pole.radius + 0.001).rotateY(axis.yRotation).add(position);
-						component.angles.set(0, axis.yRotation, 0).add(angles);
+						component.orientation.set(0, axis.yRotation, 0).add(orientation);
 					}
 					component.prevPosition.setTo(component.position);
-					component.prevAngles.setTo(component.angles);
+					component.prevOrientation.setTo(component.orientation);
 				}
 			}
 			return true;

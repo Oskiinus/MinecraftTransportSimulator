@@ -190,7 +190,7 @@ public class CameraSystem{
         			}
 					
     				//Now that the transformed camera is ready, add the camera initial offset position and rotation.
-					Point3d entityAnglesDelta = cameraProvider.prevAngles.getInterpolatedPoint(cameraProvider.angles, partialTicks);
+					Point3d entityAnglesDelta = cameraProvider.prevOrientation.getInterpolatedPoint(cameraProvider.orientation, partialTicks);
 					cameraRotation.add(entityAnglesDelta);
 					cameraPosition.add(camera.pos).rotateFine(entityAnglesDelta);
     				if(camera.rot != null){
@@ -217,14 +217,14 @@ public class CameraSystem{
 				}
 			}else if(sittingSeat != null){
             	//Get yaw delta between entity and player from-180 to 180.
-            	double playerYawDelta = (360 + (multipart.angles.y - player.getHeadYaw())%360)%360;
+            	double playerYawDelta = (360 + (multipart.orientation.y - player.getHeadYaw())%360)%360;
             	if(playerYawDelta > 180){
             		playerYawDelta-=360;
             	}
             	
             	//Get the angles from -180 to 180 for use by the component system for calculating roll and pitch angles.
-            	double pitchAngle = multipart.prevAngles.x + (multipart.angles.x - multipart.prevAngles.x)*partialTicks;
-            	double rollAngle = multipart.prevAngles.z + (multipart.angles.z - multipart.prevAngles.z)*partialTicks;
+            	double pitchAngle = multipart.prevOrientation.x + (multipart.orientation.x - multipart.prevOrientation.x)*partialTicks;
+            	double rollAngle = multipart.prevOrientation.z + (multipart.orientation.z - multipart.prevOrientation.z)*partialTicks;
             	while(pitchAngle > 180){pitchAngle -= 360;}
     			while(pitchAngle < -180){pitchAngle += 360;}
     			while(rollAngle > 180){rollAngle -= 360;}

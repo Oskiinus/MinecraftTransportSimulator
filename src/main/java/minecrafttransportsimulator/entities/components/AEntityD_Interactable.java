@@ -275,9 +275,9 @@ public abstract class AEntityD_Interactable<JSONDefinition extends AJSONInteract
 			//Update door boxes.
 			for(Entry<BoundingBox, JSONDoor> doorEntry : doorBoxes.entrySet()){
 				if(variablesOn.contains(doorEntry.getValue().name)){
-					angles.rotatePoint(doorEntry.getKey().globalCenter.setTo(doorEntry.getValue().openPos)).add(position);
+					orientation.rotatePoint(doorEntry.getKey().globalCenter.setTo(doorEntry.getValue().openPos)).add(position);
 				}else{
-					angles.rotatePoint(doorEntry.getKey().globalCenter.setTo(doorEntry.getValue().closedPos)).add(position);
+					orientation.rotatePoint(doorEntry.getKey().globalCenter.setTo(doorEntry.getValue().closedPos)).add(position);
 				}
 			}
 			return true;
@@ -319,9 +319,9 @@ public abstract class AEntityD_Interactable<JSONDefinition extends AJSONInteract
 				if(foundConnection != null){
 					switch(variableData[3]){
 						case("connected"): return 1;
-						case("pitch"): return isHookup ? foundConnection.hookupEntity.angles.x - angles.x : foundConnection.hitchEntity.angles.x - angles.x;
-						case("yaw"): return isHookup ? foundConnection.hookupEntity.angles.y - angles.y : foundConnection.hitchEntity.angles.y - angles.y;
-						case("roll"): return isHookup ? foundConnection.hookupEntity.angles.z - angles.z : foundConnection.hitchEntity.angles.z - angles.z;
+						case("pitch"): return isHookup ? foundConnection.hookupEntity.orientation.rotationX - orientation.rotationX : foundConnection.hitchEntity.orientation.rotationX - orientation.rotationX;
+						case("yaw"): return isHookup ? foundConnection.hookupEntity.orientation.rotationY - orientation.rotationY : foundConnection.hitchEntity.orientation.rotationY - orientation.rotationY;
+						case("roll"): return isHookup ? foundConnection.hookupEntity.orientation.rotationZ - orientation.rotationZ : foundConnection.hitchEntity.orientation.rotationZ - orientation.rotationZ;
 					}
 				}
 			}
@@ -412,7 +412,7 @@ public abstract class AEntityD_Interactable<JSONDefinition extends AJSONInteract
 			//This prevents bad math due to 360+ degree rotations.
 			//If we are riding this vehicle, clear out the location before we change it.
 			if(!locationRiderMap.containsValue(rider)){
-				rider.setYaw(angles.y);
+				rider.setYaw(orientation.rotationY);
 			}else{
 				locationRiderMap.inverse().remove(rider);
 			}
@@ -505,10 +505,10 @@ public abstract class AEntityD_Interactable<JSONDefinition extends AJSONInteract
 							if(hookupConnectionGroup.hookup && (hookupGroupIndex == -1 || hookupEntity.definition.connectionGroups.indexOf(hookupConnectionGroup) == hookupGroupIndex)){
 								//We can potentially connect these two entities.  See if we actually can.
 								for(JSONConnection hitchConnection : hitchConnectionGroup.connections){
-									Point3d hitchPos = angles.rotatePoint(hitchConnection.pos, new Point3d()).add(position);
+									Point3d hitchPos = orientation.rotatePoint(hitchConnection.pos, new Point3d()).add(position);
 									double maxDistance = hitchConnection.distance > 0 ? hitchConnection.distance : 2;
 									for(JSONConnection hookupConnection : hookupConnectionGroup.connections){
-										Point3d hookupPos = hookupEntity.angles.rotatePoint(hookupConnection.pos, new Point3d()).add(hookupEntity.position);
+										Point3d hookupPos = hookupEntity.orientation.rotatePoint(hookupConnection.pos, new Point3d()).add(hookupEntity.position);
 										if(hitchPos.distanceTo(hookupPos) < maxDistance + 10){
 											boolean validType = hitchConnection.type.equals(hookupConnection.type);
 											boolean validDistance = hitchPos.distanceTo(hookupPos) < maxDistance;

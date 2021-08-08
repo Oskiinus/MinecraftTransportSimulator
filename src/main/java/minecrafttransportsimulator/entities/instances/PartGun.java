@@ -223,9 +223,9 @@ public class PartGun extends APart{
 					//so a yaw change can result in a pitch change.
 					double partYawContribution = definition.gun.yawIsInternal ? localAngles.y : localAngles.y - prevOrientation.y;
 					double partPitchContribution = definition.gun.pitchIsInternal ? localAngles.x : localAngles.x - prevOrientation.x;
-					double entityPitchContribution = (entityOn.angles.x + partPitchContribution)*Math.cos(Math.toRadians(partYawContribution));
-					double entityRollContribution = (entityOn.angles.z + localAngles.z)*Math.sin(Math.toRadians(partYawContribution));
-					targetYaw = controller.getYaw() - (entityOn.angles.y + partYawContribution);
+					double entityPitchContribution = (entityOn.orientation.x + partPitchContribution)*Math.cos(Math.toRadians(partYawContribution));
+					double entityRollContribution = (entityOn.orientation.z + localAngles.z)*Math.sin(Math.toRadians(partYawContribution));
+					targetYaw = controller.getYaw() - (entityOn.orientation.y + partYawContribution);
 					targetPitch = controller.getPitch() - (entityPitchContribution + entityRollContribution);
 				}else{
 					targetYaw = defaultYaw;
@@ -542,7 +542,7 @@ public class PartGun extends APart{
 			
 			//Set the bullet's direction the the provider's orientation.
 			Point3d bulletVelocity = new Point3d(0D, 0D, 1D).rotateFine(spreadAngle);
-			bulletVelocity.rotateFine(localAngles).rotateFine(entityOn.angles);
+			bulletVelocity.rotateFine(localAngles).rotateFine(entityOn.orientation);
 			
 			//If we have a gun with a muzzle velocity, set the bullet's velocity to that.  Otherwise set it to the vehicle's velocity.
 			if(definition.gun.muzzleVelocity > 0){
@@ -554,7 +554,7 @@ public class PartGun extends APart{
 			//Get the bullet's initial position, adjusted for barrel length and gun orientation.
 			//Then move the bullet to the appropriate firing position.
 			Point3d bulletPosition = getFiringOrigin();
-			bulletPosition.rotateFine(localAngles).rotateFine(entityOn.angles);
+			bulletPosition.rotateFine(localAngles).rotateFine(entityOn.orientation);
 			bulletPosition.add(position);
 
 			//Add the bullet as a particle.

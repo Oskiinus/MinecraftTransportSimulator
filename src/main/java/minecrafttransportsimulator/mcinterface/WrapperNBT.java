@@ -155,7 +155,7 @@ public class WrapperNBT{
 	
 	public void setOrientation3d(String name, Orientation3d value){
 		setPoint3d(name + "axis", value.axis);
-		setDouble(name + "rotation", value.rotation);
+		setDouble(name + "rotation", value.rotationZ);
 		setBoolean(name + "usedInRendering", value.buffer != null);
 	}
 	

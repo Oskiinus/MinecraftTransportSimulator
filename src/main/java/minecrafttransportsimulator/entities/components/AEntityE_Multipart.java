@@ -732,7 +732,7 @@ public abstract class AEntityE_Multipart<JSONDefinition extends AJSONPartProvide
 		allPartSlotBoxes.clear();
 		for(Entry<Point3d, JSONPartDefinition> packPartEntry : getAllPossiblePackParts().entrySet()){
 			if(getPartAtLocation(packPartEntry.getKey()) == null){
-				BoundingBox newSlotBox = new BoundingBox(packPartEntry.getKey(), packPartEntry.getKey().copy().rotateFine(angles).add(position), PART_SLOT_HITBOX_WIDTH/2D, PART_SLOT_HITBOX_HEIGHT/2D, PART_SLOT_HITBOX_WIDTH/2D, false, false, false, 0);
+				BoundingBox newSlotBox = new BoundingBox(packPartEntry.getKey(), orientation.rotatePoint(packPartEntry.getKey().copy()).add(position), PART_SLOT_HITBOX_WIDTH/2D, PART_SLOT_HITBOX_HEIGHT/2D, PART_SLOT_HITBOX_WIDTH/2D, false, false, false, 0);
 				allPartSlotBoxes.put(newSlotBox, packPartEntry.getValue());
 			}
 		}

@@ -42,8 +42,8 @@ public class TileEntityDecor extends ATileEntityBase<JSONDecor> implements ITile
 			//TODO remove legacy rotation code in V21.
 			if(!converted){
 				if(!world.isAir(position)){
-					this.angles.y = -world.getBlockRotation(position);
-					this.prevAngles.y = angles.y;
+					this.orientation.y = -world.getBlockRotation(position);
+					this.prevOrientation.y = orientation.y;
 					converted = true;
 				}
 			}

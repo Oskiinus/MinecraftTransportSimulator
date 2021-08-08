@@ -201,7 +201,7 @@ public final class PartSeat extends APart{
 			case("seat_occupied_client"): return InterfaceClient.getClientPlayer().equals(riderForSeat) ? 1 : 0;
 			case("seat_rider_yaw"): {
 				if(riderForSeat != null){
-					double riderYaw = riderForSeat.getHeadYaw() - entityOn.angles.y;
+					double riderYaw = riderForSeat.getHeadYaw() - entityOn.orientation.y;
 					while(riderYaw < -180) riderYaw += 360;
 					while(riderYaw > 180) riderYaw -= 360;
 					return riderYaw;
@@ -211,9 +211,9 @@ public final class PartSeat extends APart{
 			}
 			case("seat_rider_pitch"): {
 				if(riderForSeat != null) {
-					double pitch = entityOn.angles.x;
-	            	double roll = entityOn.angles.z;
-	            	double riderYaw = riderForSeat.getHeadYaw() - entityOn.angles.y;
+					double pitch = entityOn.orientation.x;
+	            	double roll = entityOn.orientation.z;
+	            	double riderYaw = riderForSeat.getHeadYaw() - entityOn.orientation.y;
 	            	while(pitch > 180){pitch -= 360;}
 	    			while(pitch < -180){pitch += 360;}
 	    			while(roll > 180){roll -= 360;}

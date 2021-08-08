@@ -90,8 +90,8 @@ public class BuilderEntityExisting extends ABuilderEntityBase{
 	    		
 	    		//Set the new position and rotation.
 	    		setPosition(entity.position.x, entity.position.y, entity.position.z);
-	    		rotationYaw = (float) -entity.angles.y;
-	    		rotationPitch = (float) entity.angles.x;
+	    		rotationYaw = (float) -entity.orientation.y;
+	    		rotationPitch = (float) entity.orientation.x;
 	    		
 	    		//If we are outside valid bounds on the server, set us as dead and exit.
 	    		if(!world.isRemote && posY < 0 && world.isOutsideBuildHeight(getPosition())){
@@ -148,7 +148,7 @@ public class BuilderEntityExisting extends ABuilderEntityBase{
 											//Get how much the entity moved the collision box the entity collided with so we know how much to move the entity.
 											//This lets entities "move along" with entities when touching a collision box.
 											Point3d linearMovement = entity.position.copy().subtract(entity.prevPosition);
-											Point3d angularMovement = entity.angles.copy().subtract(entity.prevAngles);
+											Point3d angularMovement = entity.orientation.copy().subtract(entity.prevOrientation);
 											Point3d entityDeltaOffset = new Point3d(mcEntity.posX - entity.prevPosition.x, mcEntity.posY - entity.prevPosition.y, mcEntity.posZ - entity.prevPosition.z);
 											Point3d vehicleBoxMovement = entityDeltaOffset.copy().rotateFine(angularMovement).subtract(entityDeltaOffset).add(linearMovement);
 											

@@ -281,7 +281,7 @@ public class WrapperWorld{
 	 */
 	public void spawnEntity(AEntityB_Existing entity){
 		BuilderEntityExisting builder = new BuilderEntityExisting(entity.world.world);
-		builder.setPositionAndRotation(entity.position.x, entity.position.y, entity.position.z, (float) -entity.angles.y, (float) entity.angles.x);
+		builder.setPositionAndRotation(entity.position.x, entity.position.y, entity.position.z, (float) -entity.orientation.y, (float) entity.orientation.x);
 		builder.entity = entity;
 		world.spawnEntity(builder);
 		//Set this as we will already have loaded NBT data via spawning and don't need to load it from disk.

@@ -89,9 +89,9 @@ public final class RenderVehicle extends ARenderEntityMultipart<EntityVehicleF_P
 				if(isHoldingPart){
 					BoundingBox partBox = partSlotEntry.getKey();
 					GL11.glPushMatrix();
-					GL11.glRotated(-vehicle.angles.z, 0, 0, 1);
-					GL11.glRotated(-vehicle.angles.x, 1, 0, 0);
-					GL11.glRotated(-vehicle.angles.y, 0, 1, 0);
+					GL11.glRotated(-vehicle.orientation.z, 0, 0, 1);
+					GL11.glRotated(-vehicle.orientation.x, 1, 0, 0);
+					GL11.glRotated(-vehicle.orientation.y, 0, 1, 0);
 					GL11.glTranslated(partBox.globalCenter.x - vehicle.position.x, partBox.globalCenter.y - vehicle.position.y, partBox.globalCenter.z - vehicle.position.z);
 					if(isPartValid){
 						InterfaceRender.setColorState(0, 1, 0, 0.5F);
@@ -108,9 +108,9 @@ public final class RenderVehicle extends ARenderEntityMultipart<EntityVehicleF_P
 			Point3d playerLookVector = playerEyes.copy().add(new Point3d(0, 0, 10).rotateFine(new Point3d(player.getPitch(), player.getHeadYaw(), 0)));
 			BoundingBox highlightedBox = null;
 			GL11.glPushMatrix();
-			GL11.glRotated(-vehicle.angles.z, 0, 0, 1);
-			GL11.glRotated(-vehicle.angles.x, 1, 0, 0);
-			GL11.glRotated(-vehicle.angles.y, 0, 1, 0);
+			GL11.glRotated(-vehicle.orientation.z, 0, 0, 1);
+			GL11.glRotated(-vehicle.orientation.x, 1, 0, 0);
+			GL11.glRotated(-vehicle.orientation.y, 0, 1, 0);
 			for(Entry<BoundingBox, JSONPartDefinition> partSlotEntry : vehicle.allPartSlotBoxes.entrySet()){
 				JSONPartDefinition placementDefinition = partSlotEntry.getValue();
 				if(!vehicle.areDoorsBlocking(placementDefinition, player) && (placementDefinition.validSubNames == null || placementDefinition.validSubNames.contains(vehicle.subName))){
@@ -152,7 +152,7 @@ public final class RenderVehicle extends ARenderEntityMultipart<EntityVehicleF_P
 				//We also rotate to face the player.
 				GL11.glPushMatrix();
 				GL11.glTranslated(highlightedBox.localCenter.x, highlightedBox.localCenter.y + highlightedBox.heightRadius, highlightedBox.localCenter.z);
-				GL11.glRotated(player.getHeadYaw() - vehicle.angles.y, 0, 1, 0);
+				GL11.glRotated(player.getHeadYaw() - vehicle.orientation.y, 0, 1, 0);
 				
 				//Rotate by 180 on the z-axis.  This changes the X and Y coords from GUI to world coords. 
 				GL11.glRotated(180, 0, 0, 1);

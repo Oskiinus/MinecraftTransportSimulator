@@ -50,8 +50,8 @@ public class EntityPlayerGun extends AEntityE_Multipart<JSONPlayerGun>{
 			this.player = playerSpawning;
 			position.setTo(player.getPosition());
 			prevPosition.setTo(position);
-			angles.set(player.getPitch(), player.getHeadYaw(), 0);
-			prevAngles.setTo(angles);
+			orientation.set(player.getPitch(), player.getHeadYaw(), 0);
+			prevOrientation.setTo(orientation);
 		}else{
 			//Saved entity.  Either on the server or client.
 			//Get player via saved NBT.  If the player isn't found, we're not valid.
@@ -181,16 +181,16 @@ public class EntityPlayerGun extends AEntityE_Multipart<JSONPlayerGun>{
 					}else{
 						heldVector = activeGun.definition.gun.handHeldNormalOffset;
 					}
-					angles.set(player.getPitch(), player.getHeadYaw(), 0);
+					orientation.set(player.getPitch(), player.getHeadYaw(), 0);
 					
 					//Arm center is 0.3125 blocks away in X, 1.375 blocks up in Y.
 					//Sneaking lowers arm by 0.2 blocks.
 					//First rotate point based on pitch.  This is for only the arm movement.
-					Point3d armRotation = new Point3d(angles.x, 0, 0);
+					Point3d armRotation = new Point3d(orientation.x, 0, 0);
 					position.setTo(heldVector).rotateFine(armRotation);
 					
 					//Now rotate based on player yaw.  We need to take the arm offset into account here.
-					armRotation.set(0, angles.y, 0);
+					armRotation.set(0, orientation.y, 0);
 					position.add(-0.3125, 0, 0).rotateFine(armRotation);
 					
 					//Now add the player's position and model center point offsets.

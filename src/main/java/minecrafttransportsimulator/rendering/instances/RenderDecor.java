@@ -30,7 +30,7 @@ public class RenderDecor extends ARenderTileEntityBase<TileEntityDecor>{
 							
 							BoundingBox box = new BoundingBox(signalGroup.signalLineCenter.copy().add(0, 0, 8).rotateY(signalGroup.axis.yRotation).add(controller.intersectionCenterPoint).subtract(controller.position), signalGroup.signalLineWidth/2D, 2, 8);
 							GL11.glPushMatrix();
-							GL11.glRotated(-controller.angles.y, 0, 1, 0);
+							GL11.glRotated(-controller.orientation.y, 0, 1, 0);
 							GL11.glTranslated(box.globalCenter.x, box.globalCenter.y, box.globalCenter.z);
 							GL11.glRotated(signalGroup.axis.yRotation, 0, 1, 0);
 							

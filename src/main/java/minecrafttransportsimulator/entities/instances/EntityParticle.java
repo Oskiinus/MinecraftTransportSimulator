@@ -30,13 +30,13 @@ public class EntityParticle extends AEntityB_Existing{
 	public int age;
 
 	public EntityParticle(AEntityC_Definable<?> entitySpawning, JSONParticle definition){
-		super(entitySpawning.world, entitySpawning.position, ZERO_FOR_CONSTRUCTOR, ZERO_FOR_CONSTRUCTOR);
+		super(entitySpawning.world, entitySpawning.position, ZERO_POSITION_FOR_CONSTRUCTOR, ZERO_ORIENTATION_FOR_CONSTRUCTOR);
 		if(definition.pos != null){
-			position.add(definition.pos.copy().rotateFine(entitySpawning.angles));
+			position.add(entitySpawning.orientation.rotatePoint(definition.pos.copy()));
 		}
 		if(definition.initialVelocity != null){
 			//Set initial velocity, but add some randomness so particles don't all go in a line.
-			Point3d adjustedVelocity = definition.initialVelocity.copy().rotateFine(entitySpawning.angles);
+			Point3d adjustedVelocity = entitySpawning.orientation.rotatePoint(definition.initialVelocity.copy());
 			motion.x += adjustedVelocity.x/10D + 0.02 - Math.random()*0.04;
 			motion.y += adjustedVelocity.y/10D + 0.02 - Math.random()*0.04;
 			motion.z += adjustedVelocity.z/10D + 0.02 - Math.random()*0.04;

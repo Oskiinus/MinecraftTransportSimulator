@@ -459,9 +459,9 @@ public abstract class AEntityC_Definable<JSONDefinition extends AJSONMultiModelP
 					}
 					case TRANSLATION :{
 						if(!inhibitAnimations){
-							if(clock.animation.axis.x != 0){
+							if(clock.animation.axis.axis.x != 0){
 								lightLevel *= getAnimatedVariableValue(clock, 0, partialTicks);
-							}else if(clock.animation.axis.y != 0){
+							}else if(clock.animation.axis.axis.y != 0){
 								lightLevel += getAnimatedVariableValue(clock, 0, partialTicks);
 							}else{
 								lightLevel = (float) getAnimatedVariableValue(clock, 0, partialTicks);
@@ -562,7 +562,7 @@ public abstract class AEntityC_Definable<JSONDefinition extends AJSONMultiModelP
 	 */
 	private static double clampAndScale(double value, JSONAnimationDefinition animation, double offset){
 		if(animation.axis != null){
-			value = animation.axis.rotation*(animation.absolute ? Math.abs(value) : value) + animation.offset + offset;
+			value = animation.axis.rotationZ*(animation.absolute ? Math.abs(value) : value) + animation.offset + offset;
 			if(animation.clampMin != 0 && value < animation.clampMin){
 				value = animation.clampMin;
 			}else if(animation.clampMax != 0 && value > animation.clampMax){

@@ -21,7 +21,6 @@ public class VehicleGroundDeviceCollection{
 	private final VehicleGroundDeviceBox frontRightGDB;
 	private final VehicleGroundDeviceBox rearLeftGDB;
 	private final VehicleGroundDeviceBox rearRightGDB;
-	private final Point3d particleSpawnPos = new Point3d();
 	public final Set<PartGroundDevice> groundedGroundDevices = new HashSet<PartGroundDevice>();
 	public final Set<PartGroundDevice> drivenWheels = new HashSet<PartGroundDevice>();
 	
@@ -433,7 +432,7 @@ public class VehicleGroundDeviceCollection{
 			//We need to take into account the ground boost here, as we might have some fake motion.y from prior GDB collisions.
 			//We also don't want to apply correction if it would cause us to pitch in excess of 85 degrees.
 			//This prevents wall-climbing and other odd physics.
-			if(vehicle.motion.y - groundBoost <= 0.01 && (pitch ? Math.abs(vehicle.angles.x + testRotation) < 85 : true)){
+			if(vehicle.motion.y - groundBoost <= 0.01 && (pitch ? Math.abs(vehicle.orientation.x + testRotation) < 85 : true)){
 				//Add rotation and motion, and check for box collisions.
 				double intialLinearMovement = Math.sin(Math.toRadians(testRotation))*groundedSideOffset;
 				if(pitch){

@@ -106,10 +106,10 @@ public abstract class APart extends AEntityD_Interactable<JSONPart>{
 		}
 		
 		//Set initial position and rotation.
-		position.setTo(localOffset).rotateFine(entityOn.angles).add(entityOn.position);
-		angles.setTo(localAngles).add(entityOn.angles);
-		angles.setTo(placementAngles);
-		prevAngles.setTo(angles);
+		position.setTo(localOffset).rotateFine(entityOn.orientation).add(entityOn.position);
+		orientation.setTo(localAngles).add(entityOn.orientation);
+		orientation.setTo(placementAngles);
+		prevOrientation.setTo(orientation);
 	}
 	
 	@Override
@@ -222,8 +222,8 @@ public abstract class APart extends AEntityD_Interactable<JSONPart>{
 			}
 			
 			//Set position and rotation to our net offset pos on the entity.
-			position.setTo(localOffset).rotateFine(entityOn.angles).add(entityOn.position);
-			angles.setTo(localAngles).add(entityOn.angles);
+			position.setTo(localOffset).rotateFine(entityOn.orientation).add(entityOn.position);
+			orientation.setTo(localAngles).add(entityOn.orientation);
 			
 			//Update post-movement things.
 			updatePostMovement();

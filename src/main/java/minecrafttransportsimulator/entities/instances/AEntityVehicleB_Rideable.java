@@ -68,7 +68,8 @@ abstract class AEntityVehicleB_Rideable extends AEntityE_Multipart<JSONVehicle>{
 			if(seat.definition.seat.heightScale != 0){
 				seatYPos *= seat.definition.seat.heightScale;
 			}
-			Point3d seatLocationOffset = new Point3d(0D, seatYPos, 0D).rotateFine(seat.localAngles).add(seat.localOffset).rotateFine(angles).add(position).add(0D, -rider.getEyeHeight(), 0D);
+			//FIXME check this and dismount positions.
+			Point3d seatLocationOffset = seat.orientation.rotatePoint(new Point3d(0D, seatYPos, 0D)).add(seat.position).add(0D, -rider.getEyeHeight(), 0D);
 			rider.setPosition(seatLocationOffset);
 			rider.setVelocity(motion);
 			
@@ -84,12 +85,12 @@ abstract class AEntityVehicleB_Rideable extends AEntityE_Multipart<JSONVehicle>{
 			}
             if(controllingGun || !world.isClient() || InterfaceClient.inFirstPerson() || lockCameraToMovement){
             	//Get yaw delta between entity and player from -180 to 180.
-            	double playerYawDelta = (360 + (angles.y - rider.getYaw())%360)%360;
+            	double playerYawDelta = (360 + (orientation.rotationY - rider.getYaw())%360)%360;
             	if(playerYawDelta > 180){
             		playerYawDelta-=360;
             	}
-            	rider.setYaw(rider.getYaw() + angles.y - prevAngles.y);
-        		rider.setPitch(rider.getPitch() + Math.cos(Math.toRadians(playerYawDelta))*(angles.x - prevAngles.x) + Math.sin(Math.toRadians(playerYawDelta))*(angles.z - prevAngles.z));
+            	rider.setYaw(rider.getYaw() + orientation.rotationY - prevOrientation.rotationY);
+        		rider.setPitch(rider.getPitch() + Math.cos(Math.toRadians(playerYawDelta))*(orientation.rotationX - prevOrientation.rotationX) + Math.sin(Math.toRadians(playerYawDelta))*(orientation.rotationZ - prevOrientation.rotationZ));
              }
 			
 			//If we are on the client, and the rider is the main client player, check controls.
@@ -122,7 +123,7 @@ abstract class AEntityVehicleB_Rideable extends AEntityE_Multipart<JSONVehicle>{
 				//Rider won't be, as it's required, so we can use it to get the actual location.
 				PartSeat seat = (PartSeat) getPartAtLocation(locationRiderMap.inverse().get(rider));
 				if(seat != null){
-					rider.setYaw(angles.y + seat.localAngles.y);
+					rider.setYaw(orientation.rotationY + seat.localAngles.y);
 				}
 			}
 		}
@@ -158,25 +159,15 @@ abstract class AEntityVehicleB_Rideable extends AEntityE_Multipart<JSONVehicle>{
 		//Otherwise, put us to the right or left of the seat depending on x-offset.
 		//Make sure to take into the movement of the seat we were riding if it had moved.
 		//This ensures the dismount moves with the seat.
-		Point3d dismountPosition;
+		Point3d dismountPosition = new Point3d();
 		APart partRiding = getPartAtLocation(riderLocation);
 		if(packPart.dismountPos != null){
-			if(partRiding != null){
-				dismountPosition = packPart.dismountPos.copy().add(partRiding.localOffset).subtract(partRiding.placementOffset).rotateCoarse(angles).add(position);
-			}else{
-				dismountPosition = packPart.dismountPos.copy().rotateCoarse(angles).add(position);
-			}
+			orientation.rotatePoint(packPart.dismountPos, dismountPosition).add(position);
 		}else{
 			if(partRiding != null){
-				Point3d partDelta = partRiding.localOffset.copy().subtract(partRiding.placementOffset);
-				if(riderLocation.x < 0){
-					partDelta.x = -partDelta.x;
-					dismountPosition = riderLocation.copy().add(-2D, 0D, 0D).add(partDelta).rotateCoarse(angles).add(position);
-				}else{
-					dismountPosition = riderLocation.copy().add(2D, 0D, 0D).add(partDelta).rotateCoarse(angles).add(position);
-				}
+				partRiding.orientation.rotatePoint(dismountPosition.set(partRiding.placementOffset.x > 0 ? 2 : -2, 0, 0)).add(partRiding.position);
 			}else{
-				dismountPosition = riderLocation.copy().add(riderLocation.x > 0 ? 2D : -2D, 0D, 0D).rotateCoarse(angles).add(position);
+				orientation.rotatePoint(dismountPosition.setTo(riderLocation).add(riderLocation.x > 0 ? 2 : -2, 0, 0)).add(position);
 			}
 		}
 		rider.setPosition(dismountPosition);

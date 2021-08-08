@@ -172,7 +172,7 @@ abstract class AEntityVehicleD_Moving extends AEntityVehicleC_Colliding{
 	private RoadFollowingState getFollower(){
 		Point3d contactPoint = groundDeviceCollective.getContactPoint(false);
 		if(contactPoint != null){
-			contactPoint.rotateCoarse(angles).add(position);
+			orientation.rotatePoint(contactPoint).add(position);
 			Point3d testPoint = new Point3d();
 			ABlockBase block =  world.getBlock(contactPoint);
 			if(block instanceof BlockCollision){
@@ -187,8 +187,8 @@ abstract class AEntityVehicleD_Moving extends AEntityVehicleC_Colliding{
 								testPoint.add(road.position.x, road.position.y, road.position.z);
 								if(testPoint.distanceTo(contactPoint) < 1){
 									curve.setPointToRotationAt(testPoint, f);
-									boolean sameDirection = Math.abs(testPoint.getClampedYDelta(angles.y)) < 10;
-									boolean oppositeDirection = Math.abs(testPoint.getClampedYDelta(angles.y)) > 170;
+									boolean sameDirection = Math.abs(testPoint.getClampedYDelta(orientation.rotationY)) < 10;
+									boolean oppositeDirection = Math.abs(testPoint.getClampedYDelta(orientation.rotationY)) > 170;
 									if(sameDirection || oppositeDirection){
 										return new RoadFollowingState(lane, curve, sameDirection, f);
 									}
@@ -227,7 +227,7 @@ abstract class AEntityVehicleD_Moving extends AEntityVehicleC_Colliding{
 		normalizedGroundVelocityVector.set(motion.x, 0D, motion.z);
 		groundVelocity = normalizedGroundVelocityVector.length();
 		normalizedGroundVelocityVector.normalize();
-		normalizedGroundHeadingVector.set(headingVector.x, 0D, headingVector.z).normalize();
+		normalizedGroundHeadingVector.set(orientation.axis.x, 0D, orientation.axis.z).normalize();
 		double turningForce = getTurningForce();
 		double dotProduct = normalizedGroundVelocityVector.dotProduct(normalizedGroundHeadingVector);
 		//TODO having velocity in the formula here has the potential to lead to hang-ups. Use packets perhaps?
@@ -491,7 +491,7 @@ abstract class AEntityVehicleD_Moving extends AEntityVehicleC_Colliding{
 				//Set our position so we're aligned with the road.
 				//To do this, we get the distance between our contact points for front and rear, and then interpolate between them.
 				//First get the rear point.  This defines the delta for the movement of the vehicle.
-				rearPoint.rotateFine(angles).add(position);
+				orientation.rotatePoint(rearPoint).add(position);
 				Point3d rearDesiredPoint = rearFollower.getCurrentPoint();
 				
 				//Apply the motion based on the delta between the actual and desired.
@@ -510,8 +510,8 @@ abstract class AEntityVehicleD_Moving extends AEntityVehicleC_Colliding{
 					double yawDelta = Math.toDegrees(Math.atan2(desiredVector.x, desiredVector.z));
 					double pitchDelta = -Math.toDegrees(Math.atan2(desiredVector.y, Math.hypot(desiredVector.x, desiredVector.z)));
 					double rollDelta = 0;
-					roadRotation.set(pitchDelta - angles.x, yawDelta, rollDelta - angles.z);
-					roadRotation.y = roadRotation.getClampedYDelta(angles.y);
+					roadRotation.set(pitchDelta - orientation.rotationX, yawDelta, rollDelta - orientation.rotationZ);
+					roadRotation.y = roadRotation.getClampedYDelta(orientation.rotationY);
 					if(!world.isClient()){
 						addToSteeringAngle((float) (goingInReverse ? -roadRotation.y : roadRotation.y));
 					}
@@ -582,7 +582,7 @@ abstract class AEntityVehicleD_Moving extends AEntityVehicleC_Colliding{
 				
 				//If we are flagged as a tilting vehicle try to keep us upright, unless we are turning, in which case turn into the turn.
 				if(definition.motorized.maxTiltAngle != 0){
-					rotation.z = -angles.z - definition.motorized.maxTiltAngle*2.0*Math.min(0.5, velocity/2D)*getSteeringAngle();
+					rotation.z = -orientation.z - definition.motorized.maxTiltAngle*2.0*Math.min(0.5, velocity/2D)*getSteeringAngle();
 					if(Double.isNaN(rotation.z)){
 						rotation.z = 0;
 					}
@@ -597,7 +597,7 @@ abstract class AEntityVehicleD_Moving extends AEntityVehicleC_Colliding{
 				if(interactable instanceof AEntityVehicleD_Moving){
 					AEntityVehicleD_Moving mainVehicle = (AEntityVehicleD_Moving) interactable;
 					//Set angluar movement delta.
-					collisionRotation.setTo(mainVehicle.angles).subtract(mainVehicle.prevAngles);
+					collisionRotation.setTo(mainVehicle.orientation).subtract(mainVehicle.prevOrientation);
 					
 					//Get vector from collided box to this entity.
 					Point3d centerOffset = position.copy().subtract(mainVehicle.prevPosition);
@@ -683,7 +683,7 @@ abstract class AEntityVehicleD_Moving extends AEntityVehicleC_Colliding{
 		
 		//Now add actual position and angles.
 		position.add(motionApplied);
-		angles.add(rotationApplied);
+		orientation.add(rotationApplied);
 		
 		//Before we end this tick we need to remove any motions added for ground devices.  These motions are required 
 		//only for the updating of the vehicle position due to rotation operations and should not be considered forces.

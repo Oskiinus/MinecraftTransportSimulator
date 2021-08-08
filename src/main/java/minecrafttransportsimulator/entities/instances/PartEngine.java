@@ -434,7 +434,7 @@ public class PartEngine extends APart{
 					if(part instanceof PartPropeller){
 						PartPropeller propeller = (PartPropeller) part;
 						havePropeller = true;
-						Point3d propellerThrustAxis = new Point3d(0D, 0D, 1D).rotateCoarse(propeller.localAngles.copy().add(vehicleOn.angles));
+						Point3d propellerThrustAxis = new Point3d(0D, 0D, 1D).rotateCoarse(propeller.localAngles.copy().add(vehicleOn.orientation));
 						propellerAxialVelocity = vehicleOn.motion.dotProduct(propellerThrustAxis);
 						propellerGearboxRatio = Math.signum(currentGearRatio)*(definition.engine.propellerRatio != 0 ? definition.engine.propellerRatio : Math.abs(currentGearRatio));
 						
@@ -482,7 +482,7 @@ public class PartEngine extends APart{
 				
 				///Update variables used for jet thrust.
 				if(definition.engine.jetPowerFactor > 0){
-					Point3d engineThrustAxis = new Point3d(0D, 0D, 1D).rotateCoarse(localAngles.copy().add(vehicleOn.angles));
+					Point3d engineThrustAxis = new Point3d(0D, 0D, 1D).rotateCoarse(localAngles.copy().add(vehicleOn.orientation));
 					engineAxialVelocity = vehicleOn.motion.dotProduct(engineThrustAxis);
 					
 					//Check for entities forward and aft of the engine and damage them.
@@ -490,16 +490,16 @@ public class PartEngine extends APart{
 						boundingBox.widthRadius += 0.25;
 						boundingBox.heightRadius += 0.25;
 						boundingBox.depthRadius += 0.25;
-						boundingBox.globalCenter.add(vehicleOn.headingVector);
+						boundingBox.globalCenter.add(vehicleOn.orientation.axis);
 						Damage jetIntake = new Damage("jet_intake", definition.engine.jetPowerFactor*ConfigSystem.configObject.damage.jetDamageFactor.value*rpm/1000F, boundingBox, this, vehicleOn.getController());
 						world.attackEntities(jetIntake, null);
 						
-						boundingBox.globalCenter.subtract(vehicleOn.headingVector);
-						boundingBox.globalCenter.subtract(vehicleOn.headingVector);
+						boundingBox.globalCenter.subtract(vehicleOn.orientation.axis);
+						boundingBox.globalCenter.subtract(vehicleOn.orientation.axis);
 						Damage jetExhaust = new Damage("jet_exhaust", definition.engine.jetPowerFactor*ConfigSystem.configObject.damage.jetDamageFactor.value*rpm/2000F, boundingBox, this, jetIntake.entityResponsible).setFire();
 						world.attackEntities(jetExhaust, null);
 						
-						boundingBox.globalCenter.add(vehicleOn.headingVector);
+						boundingBox.globalCenter.add(vehicleOn.orientation.axis);
 						boundingBox.widthRadius -= 0.25;
 						boundingBox.heightRadius -= 0.25;
 						boundingBox.depthRadius -= 0.25;

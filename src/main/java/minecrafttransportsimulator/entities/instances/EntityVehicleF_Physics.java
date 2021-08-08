@@ -232,7 +232,7 @@ public class EntityVehicleF_Physics extends AEntityVehicleE_Powered{
 				}
 				if(isRotor){
 					hasRotors = true;
-					rotorRotation.set((-elevatorAngle - angles.x*10)/MAX_ELEVATOR_ANGLE, -5D*rudderAngle/MAX_RUDDER_ANGLE, (aileronAngle - angles.z*10)/MAX_AILERON_ANGLE);
+					rotorRotation.set((-elevatorAngle - orientation.x*10)/MAX_ELEVATOR_ANGLE, -5D*rudderAngle/MAX_RUDDER_ANGLE, (aileronAngle - orientation.z*10)/MAX_AILERON_ANGLE);
 				}else{
 					rotorRotation.set(0, 0, 0);
 				}
@@ -338,17 +338,17 @@ public class EntityVehicleF_Physics extends AEntityVehicleE_Powered{
 			if(definition.motorized.isBlimp){
 				//Roll and pitch are applied only if we aren't level.
 				//This only happens if we fall out of the sky and land on the ground and tilt.
-				if(angles.z > 0){
-					aileronTorque = -Math.min(0.5F, angles.z)*currentMass/100;
-				}else if(angles.z < 0){
-					aileronTorque = -Math.max(-0.5F, angles.z)*currentMass/100;
+				if(orientation.z > 0){
+					aileronTorque = -Math.min(0.5F, orientation.z)*currentMass/100;
+				}else if(orientation.z < 0){
+					aileronTorque = -Math.max(-0.5F, orientation.z)*currentMass/100;
 				}else{
 					aileronTorque = 0;
 				}
-				if(angles.x > 0){
-					elevatorTorque = -Math.min(0.5F, angles.x)*currentMass/100;
-				}else if(angles.x < 0){
-					elevatorTorque = -Math.max(-0.5F, angles.x)*currentMass/100;
+				if(orientation.x > 0){
+					elevatorTorque = -Math.min(0.5F, orientation.x)*currentMass/100;
+				}else if(orientation.x < 0){
+					elevatorTorque = -Math.max(-0.5F, orientation.x)*currentMass/100;
 				}else{
 					elevatorTorque = 0;
 				}
@@ -362,19 +362,19 @@ public class EntityVehicleF_Physics extends AEntityVehicleE_Powered{
 			
 			//As a special case, if the vehicle is a stalled plane, add a forwards pitch to allow the plane to right itself.
 			//This is needed to prevent the plane from getting stuck in a vertical position and crashing.
-			if(definition.motorized.wingArea > 0 && trackAngle > 40 && angles.x < 45 && !groundDeviceCollective.isAnythingOnGround()){
+			if(definition.motorized.wingArea > 0 && trackAngle > 40 && orientation.x < 45 && !groundDeviceCollective.isAnythingOnGround()){
 				elevatorTorque += 100;
 			}
 			
 			//Add all forces to the main force matrix and apply them.
-			totalAxialForce.set(0D, wingForce - elevatorForce, 0D).add(thrustForce).rotateFine(angles);
+			totalAxialForce.set(0D, wingForce - elevatorForce, 0D).add(thrustForce).rotateFine(orientation);
 			totalMotiveForce.set(-dragForce, -dragForce, -dragForce).multiply(normalizedVelocityVector);
 			totalGlobalForce.set(0D, ballastForce - gravitationalForce, 0D);
 			totalForce.setTo(totalAxialForce).add(totalMotiveForce).add(totalGlobalForce).multiply(1/currentMass);
 			motion.add(totalForce);
 			
 			//Add all torques to the main torque matrix and apply them.
-			pitchDirectionFactor = Math.abs(angles.z%360);
+			pitchDirectionFactor = Math.abs(orientation.z%360);
 			pitchDirectionFactor = pitchDirectionFactor < 90 || pitchDirectionFactor > 270 ? 1.0D : -1.0D;
 			totalTorque.set(elevatorTorque, rudderTorque, aileronTorque).add(thrustTorque).multiply(180D/Math.PI);
 			rotation.x = (pitchDirectionFactor*(1-Math.abs(sideVector.y))*totalTorque.x + sideVector.y*totalTorque.y)/momentPitch;
@@ -390,7 +390,7 @@ public class EntityVehicleF_Physics extends AEntityVehicleE_Powered{
 				motion.setTo(hitchRotatedOffset).subtract(hookupRotatedOffset).multiply(1/SPEED_FACTOR);
 				//FIXME this may be wrong?
 				//TODO whatever maths we apply to the part rendering we need to apply here.
-				rotation.setTo(towedByConnection.hitchEntity.angles).rotateByOrientation(towedByConnection.hitchConnection.rot, rotation);
+				rotation.setTo(towedByConnection.hitchEntity.orientation).rotateByOrientation(towedByConnection.hitchConnection.rot, rotation);
 			}else{
 				//Need to apply both motion to move the trailer, and yaw to adjust the trailer's angle relative to the truck.
 				//Yaw is applied based on the current and next position of the truck's hookup.
@@ -409,7 +409,7 @@ public class EntityVehicleF_Physics extends AEntityVehicleE_Powered{
 				tractorHitchCurrentOffsetXZ.normalize();
 				double rotationDelta;
 				if(towedByConnection.hitchConnection.restricted){
-					rotationDelta = towedByConnection.hitchEntity.angles.y - angles.y;
+					rotationDelta = towedByConnection.hitchEntity.orientation.y - orientation.y;
 				}else{
 					rotationDelta = Math.toDegrees(Math.acos(tractorHitchPrevOffsetXZ.dotProduct(tractorHitchCurrentOffsetXZ)));
 					rotationDelta *= Math.signum(tractorHitchPrevOffsetXZ.crossProduct(tractorHitchCurrentOffsetXZ).y);
@@ -420,9 +420,9 @@ public class EntityVehicleF_Physics extends AEntityVehicleE_Powered{
 				Point3d trailerHookupOffset;
 				if(!Double.isNaN(rotationDelta)){
 					rotation.y = rotationDelta;
-					angles.y += rotationDelta;
+					orientation.y += rotationDelta;
 					trailerHookupOffset = towedByConnection.getHookupCurrentPosition().subtract(position);
-					angles.y -= rotationDelta;
+					orientation.y -= rotationDelta;
 				}else{
 					trailerHookupOffset = towedByConnection.getHookupCurrentPosition().subtract(position);
 				}
@@ -464,7 +464,7 @@ public class EntityVehicleF_Physics extends AEntityVehicleE_Powered{
 					}
 				}
 				//Change pitch/roll based on movement.
-				double forwardsVelocity = motion.dotProduct(headingVector);
+				double forwardsVelocity = motion.dotProduct(orientation.axis);
 				double sidewaysVelocity = motion.dotProduct(sideVector);
 				if(forwardsVelocity < 0 && elevatorTrim < MAX_ELEVATOR_TRIM){
 					++elevatorTrim;
@@ -508,10 +508,10 @@ public class EntityVehicleF_Physics extends AEntityVehicleE_Powered{
 				InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(this, PacketVehicleControlDigital.Controls.TRIM_PITCH, false));
 			}
 			//Keep the roll angle at 0.
-			if(-angles.z > aileronTrim + 1 && aileronTrim < MAX_AILERON_TRIM){
+			if(-orientation.z > aileronTrim + 1 && aileronTrim < MAX_AILERON_TRIM){
 				++aileronTrim;
 				InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(this, PacketVehicleControlDigital.Controls.TRIM_ROLL, true));
-			}else if(-angles.z < aileronTrim - 1 && aileronTrim > -MAX_AILERON_TRIM){
+			}else if(-orientation.z < aileronTrim - 1 && aileronTrim > -MAX_AILERON_TRIM){
 				--aileronTrim;
 				InterfacePacket.sendToAllClients(new PacketVehicleControlDigital(this, PacketVehicleControlDigital.Controls.TRIM_ROLL, false));
 			}
@@ -598,10 +598,10 @@ public class EntityVehicleF_Physics extends AEntityVehicleE_Powered{
 		//Not a part of a forwarded variable.  Just return normally.
 		switch(variable){
 			//Vehicle world state cases.
-			case("yaw"): return angles.y;
-			case("heading"): int heading = (int)-angles.y; if(ConfigSystem.configObject.clientControls.north360.value) heading += 180; while (heading < 1) heading += 360; while (heading > 360) heading -= 360; return heading;
-			case("pitch"): return angles.x;
-			case("roll"): return angles.z;
+			case("yaw"): return orientation.y;
+			case("heading"): int heading = (int)-orientation.y; if(ConfigSystem.configObject.clientControls.north360.value) heading += 180; while (heading < 1) heading += 360; while (heading > 360) heading -= 360; return heading;
+			case("pitch"): return orientation.x;
+			case("roll"): return orientation.z;
 			case("altitude"): return position.y;
 			case("speed"): return axialVelocity*EntityVehicleF_Physics.SPEED_FACTOR*20;
 			case("acceleration"): return motion.length() - prevMotion.length();
@@ -634,12 +634,12 @@ public class EntityVehicleF_Physics extends AEntityVehicleE_Powered{
 			case("trim_rudder"): return rudderTrim/10D;
 			case("vertical_speed"): return motion.y*EntityVehicleF_Physics.SPEED_FACTOR*20;
 			case("lift_reserve"): return -trackAngle;
-			case("turn_coordinator"): return ((angles.z - prevAngles.z)/10 + angles.y - prevAngles.y)/0.15D*25;
-			case("turn_indicator"): return (angles.y - prevAngles.y)/0.15F*25F;
+			case("turn_coordinator"): return ((orientation.z - prevOrientation.z)/10 + orientation.y - prevOrientation.y)/0.15D*25;
+			case("turn_indicator"): return (orientation.y - prevOrientation.y)/0.15F*25F;
 			case("slip"): return 75*sideVector.dotProduct(normalizedVelocityVector);
 			case("gear_setpoint"): return gearUpCommand ? 1 : 0;
 			case("gear_moving"): return (gearUpCommand ? gearMovementTime != definition.motorized.gearSequenceDuration : gearMovementTime != 0) ? 1 : 0;
-			case("beacon_direction"): return selectedBeacon != null ? angles.getClampedYDelta(Math.toDegrees(Math.atan2(selectedBeacon.position.x - position.x, selectedBeacon.position.z - position.z))) : 0;
+			case("beacon_direction"): return selectedBeacon != null ? orientation.getClampedYDelta(Math.toDegrees(Math.atan2(selectedBeacon.position.x - position.x, selectedBeacon.position.z - position.z))) : 0;
 			case("beacon_bearing_setpoint"): return selectedBeacon != null ? selectedBeacon.bearing : 0;
 			case("beacon_bearing_delta"): return selectedBeacon != null ? selectedBeacon.getBearingDelta(this) : 0;
 			case("beacon_glideslope_setpoint"): return selectedBeacon != null ? selectedBeacon.glideSlope : 0;
@@ -660,7 +660,7 @@ public class EntityVehicleF_Physics extends AEntityVehicleE_Powered{
 								case("distance"): return missilesIncoming.get(missileNumber).targetDistance;
 								case("direction"): {
 									Point3d missilePos = missilesIncoming.get(missileNumber).position;
-									return Math.toDegrees(Math.atan2(-missilePos.z + position.z, -missilePos.x + position.x)) + 90 + angles.y;
+									return Math.toDegrees(Math.atan2(-missilePos.z + position.z, -missilePos.x + position.x)) + 90 + orientation.y;
 								}
 							}
 						}

@@ -6,19 +6,29 @@ import org.lwjgl.BufferUtils;
 
 /**Basic Orientation class.  Stores an axis for direction, and rotation about that axis as a double.
  * Maintains a Quaternion of these, which allows it to be multiplied with other rotation objects to 
- * produce a final rotation.  Used to store the orientation of objects and
- * render them without the use of Euler Angles.  This allow for multiple axis of rotation to be
- * applied and prevents odd bugs with interpolation due to sign differences.  Note that if
- * this rotation object is to maintain a rotation matrix in the {@link #buffer} variable,
- * then usedInRendering MUST be set in the constructor.  Otherwise said buffer will be null.
- * This is done to prevent the need to update the buffer every update of the rotation if we won't
+ * produce a final rotation.  Used to store the orientation of objects and render them without the use 
+ * of Euler Angles.  This allow for multiple axis of rotation to be applied and prevents odd bugs with 
+ * interpolation due to sign differences.  Note that if this rotation object is to maintain a rotation 
+ * matrix in the {@link #buffer} variable, then usedInRendering MUST be set in the constructor.  
+ * Otherwise said buffer will be null.  This is done to prevent the need to update the buffer every 
+ * update of the rotation if we won't
  * be using it.
+ * <br><br>
+ * Should modifications need to be made to this object, they should be done so via the methods here
+ * rather than directly-modifying the various public variables.  This will ensure a proper state is
+ * maintained.  That being said, if you only plan on working with a single variable for a sequence of
+ * operations, you may modify it during those operations, provided one of the methods is called before
+ * needing the other state data.  For example, you may modify the {@link #axis} multiple times, but
+ * as long as the {@link #buffer}, {@link #rotationX}, or quaternion is not queried, before calling 
+ * {@link #updateQuaternion()} you will be fine.
  *
  * @author don_bruce
  */
 public class Orientation3d{
 	public final Point3d axis;
-	public double rotation;
+	public double rotationX;
+	public double rotationY;
+	public double rotationZ;
 	public final FloatBuffer buffer;
 	private double x;
 	private double y;
@@ -31,11 +41,12 @@ public class Orientation3d{
 	
 	public Orientation3d(Point3d axis, double rotation, boolean usedInRendering){
 		this.axis = axis;
-		this.rotation = rotation;
+		this.rotationZ = rotation;
 		this.buffer = usedInRendering ? BufferUtils.createFloatBuffer(16) : null;
-		updateQuaternion();
+		updateQuaternion(false);
 	}
 	
+	/*
 	public Orientation3d(double rotX, double rotY, double rotZ){
 		// Convert from Euler Angles void Quaternion::FromEuler(float pitch, float yaw, float roll) { // Basically we create 3 Quaternions, one for pitch, one for yaw, one for roll // and multiply those together. // the calculation below does the same, just shorter
 
@@ -46,33 +57,36 @@ public class Orientation3d{
 		x = sinr * cosp * cosy - cosr * sinp * siny; y = cosr * sinp * cosy + sinr * cosp * siny; z = cosr * cosp * siny - sinr * sinp * cosy; w = cosr * cosp * cosy + sinr * sinp * siny;
 
 		normalise(); }
-	}
-
-
-	/**
-	 * Updates the Axis and rotation.  This should be done any time the quaternion changes.
-	 */
-	public void updateAxisRotation(){
-		Quaternion to axis-angle
-		Given a quaternion {\displaystyle q=w+{\vec {v}}}, the (non-normalized) rotation axis is simply {\displaystyle {\vec {v}}}, provided that an axis exists. For very small rotations, {\displaystyle {\vec {v}}} gets close to the zero vector, so when we compute the normalized rotation axis, the calculation may blow up. In particular, the identity rotation has {\displaystyle {\vec {v}}=0}, so the rotation axis is undefined.
-	
-		To find the angle of rotation, note that {\displaystyle w=\cos(\theta /2)} and {\displaystyle \|v\|=\sin(\theta /2)}.
-	
-		// Convert to Axis/Angles void Quaternion::getAxisAngle(Vector3 *axis, float *angle) { float scale = sqrt(x * x + y * y + z * z); axis->x = x / scale; axis->y = y / scale; axis->z = z / scale; *angle = acos(w) * 2.0f; }
-	}
+	}*/
 	
 	/**
-	 * Updates the Quaternion.  This should be done any time the axis or rotation changes.
+	 * Updates the Quaternion.  This should be done any time {@link #axis}, {@link #rotationZ}, or quaternion parameters XYZW changes.
+	 * If the boolean parameter is set, then the quanternion values will be used to calculate the axis.
+	 * If it is false, then they will be calculated from the axis.
 	 */
-	public void updateQuaternion(){
-		double rotationInRad = Math.toRadians(rotation);
-		double sinRad = Math.sin(rotationInRad/2D);
-		double cosRad = Math.cos(rotationInRad/2D);
+	public void updateQuaternion(boolean useQuaternionValues){
+		if(useQuaternionValues){
+			//FIXME this may not be right.  Doesn't seem like it...
+			double scale = Math.sqrt(x*x + y*y + z*z);
+			axis.x = x/scale;
+			axis.y = y/scale;
+			axis.z = z/scale;
+			rotationZ = Math.acos(w)*2;
+		}else{
+			double rotationInRad = Math.toRadians(rotationZ);
+			double sinRad = Math.sin(rotationInRad/2D);
+			double cosRad = Math.cos(rotationInRad/2D);
+			x = axis.x*sinRad;
+			y = axis.y*sinRad;
+			z = axis.z*sinRad;
+			w = cosRad;
+		}
 		
-		x = axis.x*sinRad;
-		y = axis.y*sinRad;
-		z = axis.z*sinRad;
-		w = cosRad;
+		double theta = Math.asin(axis.y);
+		double phi = Math.atan2(axis.x, axis.z);
+		//Positive acos for theta maybe?  Other code shows this.
+		rotationX = -Math.toDegrees(theta);
+		rotationY =  Math.toDegrees(phi);
 		
 		if(buffer != null){
 			buffer.clear();
@@ -106,26 +120,36 @@ public class Orientation3d{
 	}
 	
 	/**
-	 * Multiplies this orientation by the first passed-in orientation, storing the result in the
-	 * second orientation.  Note that this may be the same object as the one to multiply by.
-	 * Returns the storing object for nested operations.
+	 * Sets this orientation to the parameters of the passed-in orientation.
+	 * Returns this object for nested operations.
 	 */
-	public Orientation3d rotateByOrientation(Orientation3d multiplyBy, Orientation3d storeIn){
+	public Orientation3d setTo(Orientation3d other){
+		this.axis.setTo(other.axis);
+		this.rotationZ = other.rotationZ;
+		updateQuaternion(false);
+		return this;
+	}
+	
+	/**
+	 * Multiplies this orientation by the passed-in orientation, storing the result in this orientation.
+	 * Returns this orientation for nested operations.
+	 */
+	public Orientation3d rotateByOrientation(Orientation3d multiplyBy){
+		//Need to put these into variables as we use your XYZW params for four operations.
 		double mX = x * multiplyBy.w + w * multiplyBy.x + y * multiplyBy.z - z * multiplyBy.y;
 		double mY = y * multiplyBy.w + w * multiplyBy.y + z * multiplyBy.x - x * multiplyBy.z;
 		double mZ = z * multiplyBy.w + w * multiplyBy.z + x * multiplyBy.y - y * multiplyBy.x;
 		double mW = w * multiplyBy.w - x * multiplyBy.x - y * multiplyBy.y - z * multiplyBy.z;
-		storeIn.x = mX;
-		storeIn.y = mY;
-		storeIn.z = mZ;
-		storeIn.w = mW;
-		//FIXME make this calculate the axis and set it.
-		return storeIn;
+		this.x = mX;
+		this.y = mY;
+		this.z = mZ;
+		this.w = mW;
+		updateQuaternion(true);
+		return this;
 	}
 	
 	/**
 	 * Rotates the passed-in point, storing it in the passed-in point object.
-	 * Note that this may be the same object as the one to rotate.
 	 * Returns the storing object for nested operations.
 	 */
 	public Point3d rotatePoint(Point3d rotate, Point3d storeIn){
@@ -152,22 +176,11 @@ public class Orientation3d{
 	}
 	
 	/**
-	 * Sets this orientation to the parameters of the passed-in orientation.
-	 * Returns this object for nested operations.
-	 */
-	public Orientation3d setTo(Orientation3d other){
-		this.axis.setTo(other.axis);
-		this.rotation = other.rotation;
-		updateQuaternion();
-		return this;
-	}
-	
-	/**
 	 * Returns a copy of this rotation as a new object.
 	 * This also copies the {@link #axis} object to prevent
 	 * an inconsistent state.
 	 */
-	public Orientation3d copy(){
+	/*public Orientation3d copy(){
 		return new Orientation3d(axis.copy(), rotation, buffer != null);
-	}
+	}*/
 }

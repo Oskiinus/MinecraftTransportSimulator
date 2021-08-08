@@ -122,14 +122,14 @@ public class InterfaceEventsEntityRendering{
         	GL11.glPushMatrix();
         	if(ridingEntity != null){
         		//Get total angles for the entity the player is riding.
-        		Point3d entityAngles = ridingEntity.angles.copy();
+        		Point3d entityAngles = ridingEntity.orientation.copy();
         		Point3d ridingAngles = new Point3d();
 	            if(ridingEntity instanceof EntityVehicleF_Physics){
 	            	//Set our angles to match the seat we are riding in.
 	            	for(WrapperEntity rider : ridingEntity.locationRiderMap.values()){
 						if(player.equals(rider.entity)){
 							PartSeat seat = (PartSeat) ((EntityVehicleF_Physics) ridingEntity).getPartAtLocation(ridingEntity.locationRiderMap.inverse().get(rider));
-							ridingAngles = seat.prevAngles.getInterpolatedPoint(seat.angles, event.getPartialRenderTick()).subtract(seat.entityOn.angles);
+							ridingAngles = seat.prevOrientation.getInterpolatedPoint(seat.orientation, event.getPartialRenderTick()).subtract(seat.entityOn.orientation);
 		            		
 		            		//Set sitting mode to the seat we are sitting in.
 		            		//If we aren't standing, we'll need to adjust the legs.
@@ -300,7 +300,7 @@ public class InterfaceEventsEntityRendering{
 	    			//Rotate to match player's facing direction if we aren't in a vehicle
 	    			if(!renderCurrentRiderControlling){
 		    			if(ridingEntity != null){
-		    	    		GL11.glRotated(player.rotationYaw + ridingEntity.angles.y, 0, 1, 0);
+		    	    		GL11.glRotated(player.rotationYaw + ridingEntity.orientation.y, 0, 1, 0);
 		    	        }else{
 		    	        	GL11.glRotated(player.rotationYaw, 0, 1, 0);
 		    	        }
