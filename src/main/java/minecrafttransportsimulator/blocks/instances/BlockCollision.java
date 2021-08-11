@@ -8,7 +8,6 @@ import minecrafttransportsimulator.baseclasses.Point3d;
 import minecrafttransportsimulator.blocks.components.ABlockBase;
 import minecrafttransportsimulator.blocks.tileentities.components.ATileEntityBase;
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityRoad;
-import minecrafttransportsimulator.mcinterface.WrapperPlayer;
 import minecrafttransportsimulator.mcinterface.WrapperWorld;
 
 public class BlockCollision extends ABlockBase{
@@ -26,11 +25,6 @@ public class BlockCollision extends ABlockBase{
 	}
     
     @Override
-	public boolean onClicked(WrapperWorld world, Point3d position, Axis axis, WrapperPlayer player){
-		return false;
-	}
-    
-    @Override
     public void onBroken(WrapperWorld world, Point3d position){
     	TileEntityRoad masterBlock = getMasterRoad(world, position);
     	if(masterBlock != null && masterBlock.isActive()){
@@ -44,12 +38,7 @@ public class BlockCollision extends ABlockBase{
     }
     
     @Override
-    public void addCollisionBoxes(WrapperWorld world, Point3d position, List<BoundingBox> collidingBoxes){
-		collidingBoxes.add(blockBounds);
-	}
-    
-    @Override
-    public BoundingBox getCollisionBounds(){
+    public BoundingBox getCollisionBox(WrapperWorld world, Point3d position){
 		return blockBounds;
 	}
     

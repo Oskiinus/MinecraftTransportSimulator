@@ -1,7 +1,5 @@
 package minecrafttransportsimulator.blocks.components;
 
-import java.util.List;
-
 import minecrafttransportsimulator.baseclasses.BoundingBox;
 import minecrafttransportsimulator.baseclasses.Point3d;
 import minecrafttransportsimulator.mcinterface.BuilderBlock;
@@ -19,7 +17,7 @@ public abstract class ABlockBase{
 	public final float hardness;
 	public final float blastResistance;
 	
-	protected static final BoundingBox SINGLE_BLOCK_BOUNDS = new BoundingBox(new Point3d(), 0.5D, 0.5D, 0.5D);
+	protected static final BoundingBox mutableBounds = new BoundingBox(new Point3d(), 0.5D, 0.5D, 0.5D);
 	
 	public ABlockBase(float hardness, float blastResistance){
 		this.hardness = hardness;
@@ -34,49 +32,22 @@ public abstract class ABlockBase{
 	public void onPlaced(WrapperWorld world, Point3d position, WrapperPlayer player){}
 	
 	/**
-	 *  Called when this block is clicked.  Return true if this block does
-	 *  a thing, false if the block just exists to be pretty.  Actions may
-	 *  or may not be taken.  Note that this is called both on the server and
-	 *  on the client, so watch your actions and packets!
-	 */
-	public abstract boolean onClicked(WrapperWorld world, Point3d position, Axis axis, WrapperPlayer player);
-	
-	/**
 	 *  Called when this block is removed from the world.  This occurs when the block is broken
 	 *  by a player, explosion, vehicle, etc.  This method is called prior to the Tile Entity being
 	 *  removed, as logic may be needed to be performed that requires the data from the TE.
-	 *  This is ONLY called on the server, so if you have data to sync, do it via packets. 
+	 *  This is ONLY called on the server, so if you have data to sync, do it via packets.
 	 */
 	public void onBroken(WrapperWorld world, Point3d position){}
-
-	/**
-	 *  Gets the current rotation of the block at the passed-in point.
-	 *  Angle will be either 0, 90, 180, or 270.  This is internally
-	 *  set by MC-standard methods when the player places the block, and is
-	 *  not modifiable by any block-based code.
-	 */
-	public float getRotation(WrapperWorld world, Point3d position){
-		return world.getBlockRotation(position);
-	}
 	
 	/**
-	 *  Adds all collision boxes to the passed-in list.  This is sent back to MC
-	 *  to handle collisions with this block.  May be based on state or TE data.
-	 *  Note that all collisions are relative to the block's location.
-	 */
-	public void addCollisionBoxes(WrapperWorld world, Point3d position, List<BoundingBox> collidingBoxes){
-		collidingBoxes.add(SINGLE_BLOCK_BOUNDS);
-	}
-	
-	/**
-	 *  Returns the main bounding box for this block.  This should normally be the standard full-block size
-	 *  to ensure all the appropriate collision checks are done.  However, should the block have a collision
+	 *  Returns the collision bounding box for this block.  This should normally be the standard full-block size
+	 *  to ensure the block will collide no matter the model.  However, should the block have a collision
 	 *  mapping smaller than this, then a smaller box should be returned.  This prevents the block from 
-	 *  interfering with player clicking actions and Bad Mods doing Bad Stuff by checking this rather than 
-	 *  the collision box listing.
+	 *  interfering with player clicking actions and Bad Mods doing Bad Stuff.
 	 */
-	public BoundingBox getCollisionBounds(){
-		return SINGLE_BLOCK_BOUNDS;
+	public BoundingBox getCollisionBox(WrapperWorld world, Point3d position){
+		mutableBounds.globalCenter.setTo(position);
+		return mutableBounds;
 	}
 	
 	/**
@@ -132,12 +103,15 @@ public abstract class ABlockBase{
 			}
 		}
 		
-		public static Axis getFromRotation(double rotation){
+		public static Axis getFromRotation(double rotation, boolean checkDiagonals){
 			rotation = rotation%360;
 			if(rotation < 0){
 				rotation += 360;
 			}
-			int degRotation = (int) (Math.round(rotation/45)*45);
+			int degRotation = checkDiagonals ? (int) (Math.round(rotation/45)*45) : (int) (Math.round(rotation/90)*90);
+			if(degRotation == 360){
+				degRotation = 0;
+			}
 			for(Axis axis : values()){
 				if(axis.xzPlanar && axis.yRotation == degRotation){
 					return axis;

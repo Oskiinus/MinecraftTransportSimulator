@@ -130,7 +130,7 @@ public class RenderRoad extends ARenderTileEntityBase<TileEntityRoad>{
 									GL11.glNormal3f(vertex[5], vertex[6], vertex[7]);
 									//Need to offset by 0.5 to match the offset of the TE as we're block-aligned.
 									position.set(vertex[0] - 0.5, vertex[1], vertex[2] - 0.5);
-									position.rotateFine(road.rotation);
+									position.rotateFine(road.angles);
 									GL11.glVertex3d(position.x, position.y, position.z);
 								}
 							}

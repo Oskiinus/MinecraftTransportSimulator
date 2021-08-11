@@ -2,7 +2,6 @@ package minecrafttransportsimulator.jsondefs;
 
 import java.util.List;
 
-import minecrafttransportsimulator.items.instances.ItemDecor.DecorComponentType;
 import minecrafttransportsimulator.packloading.JSONParser.JSONDescription;
 import minecrafttransportsimulator.packloading.JSONParser.JSONRequired;
 
@@ -44,4 +43,21 @@ public class JSONDecor extends AJSONMultiModelProvider{
     	@Deprecated
     	public List<String> items;
     }
+	
+	public static enum DecorComponentType{
+		@JSONDescription("Will make the decor have no functionality.")
+		GENERIC,
+		@JSONDescription("Will make the decor have chest functionality.")
+		CHEST,
+		@JSONDescription("Will make the decor have beacon functionality.")
+		BEACON,
+		@JSONDescription("Will make the decor have signal controller functionality.")
+		SIGNAL_CONTROLLER,
+		@JSONDescription("Will make the decor have fuel pump functionality.  Text rendering may be added by adding textObjects in the rendering section.  These are hard-coded to render the loader's internal fluid name, level, and amount dispensed, in that order.  Adding more textObject entries starts this cycle over.")
+		FUEL_PUMP,
+		@JSONDescription("Will make the decor have fluid loader functionality.  Text cannot be rendered on loaders like on fuel pumps.")
+		FLUID_LOADER,
+		@JSONDescription("Will make the decor have radio functionality.  Exact same system as vehicles.  It even syncs up with them!")
+		RADIO;
+	}
 }

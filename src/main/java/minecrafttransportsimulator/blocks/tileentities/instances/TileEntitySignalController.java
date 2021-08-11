@@ -9,18 +9,19 @@ import java.util.Set;
 import minecrafttransportsimulator.baseclasses.Point3d;
 import minecrafttransportsimulator.blocks.components.ABlockBase.Axis;
 import minecrafttransportsimulator.blocks.tileentities.components.ATileEntityPole_Component;
-import minecrafttransportsimulator.blocks.tileentities.components.ITileEntityTickable;
 import minecrafttransportsimulator.entities.components.AEntityC_Definable;
 import minecrafttransportsimulator.entities.instances.EntityVehicleF_Physics;
 import minecrafttransportsimulator.mcinterface.WrapperNBT;
+import minecrafttransportsimulator.mcinterface.WrapperPlayer;
 import minecrafttransportsimulator.mcinterface.WrapperWorld;
+import minecrafttransportsimulator.packets.instances.PacketEntityGUIRequest;
 
 /**Traffic signal controller tile entity.  Responsible for keeping the state of traffic
  * intersections.
 *
 * @author don_bruce
 */
-public class TileEntitySignalController extends TileEntityDecor implements ITileEntityTickable{	
+public class TileEntitySignalController extends TileEntityDecor{	
 		
 	//Main settings for all operation.
 	public boolean isRightHandDrive;
@@ -97,6 +98,12 @@ public class TileEntitySignalController extends TileEntityDecor implements ITile
 		}else{
 			return false;
 		}
+	}
+	
+	@Override
+	public boolean interact(WrapperPlayer player){
+		player.sendPacket(new PacketEntityGUIRequest(this, player, PacketEntityGUIRequest.EntityGUIType.SIGNAL_CONTROLLER));
+		return true;
 	}
 	
 	@Override
@@ -447,7 +454,7 @@ public class TileEntitySignalController extends TileEntityDecor implements ITile
 		
 		@Override
 		protected boolean isSignalBlocking(SignalGroup otherSignal){
-			switch(Axis.getFromRotation(otherSignal.axis.yRotation - axis.yRotation)){
+			switch(Axis.getFromRotation(otherSignal.axis.yRotation - axis.yRotation, true)){
 				case SOUTH : { //Same direction.
 					return false;
 				}
@@ -516,7 +523,7 @@ public class TileEntitySignalController extends TileEntityDecor implements ITile
 		
 		@Override
 		protected boolean isSignalBlocking(SignalGroup otherSignal){
-			switch(Axis.getFromRotation(otherSignal.axis.yRotation - axis.yRotation)){
+			switch(Axis.getFromRotation(otherSignal.axis.yRotation - axis.yRotation, true)){
 				case SOUTH : { //Same direction.
 					return false;
 				}
@@ -585,7 +592,7 @@ public class TileEntitySignalController extends TileEntityDecor implements ITile
 		
 		@Override
 		protected boolean isSignalBlocking(SignalGroup otherSignal){
-			switch(Axis.getFromRotation(otherSignal.axis.yRotation - axis.yRotation)){
+			switch(Axis.getFromRotation(otherSignal.axis.yRotation - axis.yRotation, true)){
 				case SOUTH : { //Same direction.
 					return false;
 				}

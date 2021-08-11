@@ -1,61 +1,49 @@
 package minecrafttransportsimulator.blocks.instances;
 
 import minecrafttransportsimulator.baseclasses.Point3d;
-import minecrafttransportsimulator.blocks.components.ABlockBaseDecor;
+import minecrafttransportsimulator.blocks.components.ABlockBaseTileEntity;
+import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityBeacon;
+import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityChest;
 import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityDecor;
-import minecrafttransportsimulator.items.components.AItemBase;
-import minecrafttransportsimulator.items.instances.ItemItem;
-import minecrafttransportsimulator.items.instances.ItemItem.ItemComponentType;
+import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityFluidLoader;
+import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityFuelPump;
+import minecrafttransportsimulator.blocks.tileentities.instances.TileEntityRadio;
+import minecrafttransportsimulator.blocks.tileentities.instances.TileEntitySignalController;
+import minecrafttransportsimulator.items.instances.ItemDecor;
+import minecrafttransportsimulator.jsondefs.JSONDecor.DecorComponentType;
 import minecrafttransportsimulator.mcinterface.WrapperNBT;
 import minecrafttransportsimulator.mcinterface.WrapperPlayer;
 import minecrafttransportsimulator.mcinterface.WrapperWorld;
-import minecrafttransportsimulator.packets.components.InterfacePacket;
-import minecrafttransportsimulator.packets.instances.PacketEntityGUIRequest;
-import minecrafttransportsimulator.packets.instances.PacketEntityVariableToggle;
+import minecrafttransportsimulator.systems.PackParserSystem;
 
-public class BlockDecor extends ABlockBaseDecor<TileEntityDecor>{
+public class BlockDecor extends ABlockBaseTileEntity{
 	
     public BlockDecor(){
-    	super();
+    	super(10.0F, 5.0F);
 	}
     
     @Override
-	public boolean onClicked(WrapperWorld world, Point3d position, Axis axis, WrapperPlayer player){
-    	TileEntityDecor decor = (TileEntityDecor) world.getTileEntity(position);
-    	AItemBase heldItem = player.getHeldItem();
-		if(heldItem instanceof ItemItem && ((ItemItem) heldItem).definition.item.equals(ItemComponentType.PAINT_GUN)){
-			//Don't do decor actions if we are holding a paint gun.
-			return false;
-		}else if(decor.definition.decor.crafting != null){
-			if(!world.isClient()){
-				player.sendPacket(new PacketEntityGUIRequest(decor, player, PacketEntityGUIRequest.EntityGUIType.PART_BENCH));
-				
-			}
-		}else if(!decor.text.isEmpty()){
-			if(!world.isClient()){
-				player.sendPacket(new PacketEntityGUIRequest(decor, player, PacketEntityGUIRequest.EntityGUIType.TEXT_EDITOR));
-			}
-		}
-		if(!world.isClient()){
-			decor.variablesOn.add("clicked");
-			if(decor.variablesOn.contains("activated")){
-				decor.variablesOn.remove("activated");
-			}else{
-				decor.variablesOn.add("activated");
-			}
-			InterfacePacket.sendToAllClients(new PacketEntityVariableToggle(decor, "clicked"));
-			InterfacePacket.sendToAllClients(new PacketEntityVariableToggle(decor, "activated"));
-		}
-		return true;
+	public void onPlaced(WrapperWorld world, Point3d position, WrapperPlayer player){
+		//Set placing player for reference.
+    	TileEntityDecor tile = world.getTileEntity(position);
+    	if(tile != null && tile.definition.decor.type.equals(DecorComponentType.FUEL_PUMP)){
+    		((TileEntityFuelPump) tile).placingPlayerID = player.getID();
+    	}
 	}
     
     @Override
 	public TileEntityDecor createTileEntity(WrapperWorld world, Point3d position, WrapperNBT data){
-		return new TileEntityDecor(world, position, data);
-	}
-
-	@Override
-	public Class<TileEntityDecor> getTileEntityClass(){
-		return TileEntityDecor.class;
+    	ItemDecor item = PackParserSystem.getItem(data);
+    	switch(item.definition.decor.type){
+			case BEACON: return new TileEntityBeacon(world, position, data);
+			case CHEST: return new TileEntityChest(world, position, data);
+			case FLUID_LOADER: return new TileEntityFluidLoader(world, position, data);
+			case FUEL_PUMP: return new TileEntityFuelPump(world, position, data);
+			case GENERIC: return new TileEntityDecor(world, position, data);
+			case RADIO: return new TileEntityRadio(world, position, data);
+			case SIGNAL_CONTROLLER: return new TileEntitySignalController(world, position, data);
+    	}
+    	//We'll never get here.
+    	return null;
 	}
 }

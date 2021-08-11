@@ -1,6 +1,7 @@
 package minecrafttransportsimulator.entities.instances;
 
 import java.util.Iterator;
+import java.util.List;
 
 import minecrafttransportsimulator.baseclasses.Point3d;
 import minecrafttransportsimulator.entities.components.AEntityE_Multipart;
@@ -14,8 +15,10 @@ import minecrafttransportsimulator.mcinterface.WrapperEntity;
 import minecrafttransportsimulator.mcinterface.WrapperNBT;
 import minecrafttransportsimulator.mcinterface.WrapperPlayer;
 import minecrafttransportsimulator.mcinterface.WrapperWorld;
+import minecrafttransportsimulator.packloading.PackMaterialComponent;
 import minecrafttransportsimulator.systems.ConfigSystem;
 import minecrafttransportsimulator.systems.ControlSystem;
+import net.minecraft.item.ItemStack;
 
 
 /**This is the first vehicle class level.  This class sits on top of the base
@@ -186,6 +189,16 @@ abstract class AEntityVehicleB_Rideable extends AEntityE_Multipart<JSONVehicle>{
 			//Client player is the one that left the vehicle.  Make sure they don't have their mouse locked or a GUI open.
 			InterfaceInput.setMouseEnabled(true);
 			InterfaceGUI.closeGUI();
+		}
+	}
+	
+	@Override
+	public void addDropsToList(List<ItemStack> drops){
+		//Don't drop ourselves.  Instead, drop crafting components.
+		for(PackMaterialComponent material : PackMaterialComponent.parseFromJSON(getItem(), true, true, false)){
+			if(Math.random() < ConfigSystem.configObject.damage.crashItemDropPercentage.value){
+				drops.add(material.possibleItems.get(0));
+			}
 		}
 	}
 	

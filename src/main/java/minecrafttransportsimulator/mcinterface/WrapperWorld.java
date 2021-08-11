@@ -15,7 +15,7 @@ import minecrafttransportsimulator.baseclasses.Damage;
 import minecrafttransportsimulator.baseclasses.Point3d;
 import minecrafttransportsimulator.blocks.components.ABlockBase;
 import minecrafttransportsimulator.blocks.components.ABlockBase.Axis;
-import minecrafttransportsimulator.blocks.components.IBlockTileEntity;
+import minecrafttransportsimulator.blocks.components.ABlockBaseTileEntity;
 import minecrafttransportsimulator.blocks.tileentities.components.ATileEntityBase;
 import minecrafttransportsimulator.entities.components.AEntityA_Base;
 import minecrafttransportsimulator.entities.components.AEntityB_Existing;
@@ -449,7 +449,7 @@ public class WrapperWorld{
 	 */
 	public ABlockBase getBlock(Point3d position){
 		Block block = world.getBlockState(new BlockPos(position.x, position.y, position.z)).getBlock();
-		return block instanceof BuilderBlock ? ((BuilderBlock) block).mcBlock : null;
+		return block instanceof BuilderBlock ? ((BuilderBlock) block).block : null;
 	}
 	
 	/**
@@ -497,14 +497,6 @@ public class WrapperWorld{
 		}
 		return null;
 	}
-	
-	/**
-	 *  Returns the rotation (in degrees) of the block at the passed-in position.
-	 *  Only valid for blocks of type {@link ABlockBase}.
-	 */
-    public float getBlockRotation(Point3d position){
-    	return world.getBlockState(new BlockPos(position.x, position.y, position.z)).getValue(BuilderBlock.FACING).getHorizontalAngle();
-    }
 	
     /**
 	 *  Returns true if the block at the passed-in position is solid at the passed-in axis.
@@ -686,7 +678,7 @@ public class WrapperWorld{
 	            	IBlockState newState = wrapper.getStateForPlacement(world, pos, facing, 0, 0, 0, 0, player.player, EnumHand.MAIN_HAND);
 	            	if(world.setBlockState(pos, newState, 11)){
 		            	//Block is set.  See if we need to set TE data.
-		            	if(block instanceof IBlockTileEntity){
+		            	if(block instanceof ABlockBaseTileEntity){
 		            		BuilderTileEntity<TileEntityType> builderTile = (BuilderTileEntity<TileEntityType>) world.getTileEntity(pos);
 		            		WrapperNBT data;
 		            		if(stack.hasTagCompound()){
@@ -701,9 +693,10 @@ public class WrapperWorld{
 				            		}
 		            			}
 		            		}
-		            		data.setDouble("rotation", Math.round(player.getHeadYaw()/15)*15%360);
-		            		builderTile.tileEntity = ((IBlockTileEntity<TileEntityType>) block).createTileEntity(this, position, data);
-		            		
+		            		data.setPoint3d("angles", new Point3d(0, Math.round(player.getHeadYaw()/15)*15%360, 0));
+		            		builderTile.tileEntity = (TileEntityType) ((ABlockBaseTileEntity) block).createTileEntity(this, position, data);
+		            		int clampAngle = builderTile.tileEntity.getRotationIncrement();
+		            		builderTile.tileEntity.angles.y = Math.round(player.getHeadYaw()/clampAngle)*clampAngle%360;
 		            	}
 		            	//Send place event to block class, and also send initial update check.
 		            	block.onPlaced(this, position, player);
@@ -714,9 +707,9 @@ public class WrapperWorld{
     		}else{
     			IBlockState newState = wrapper.getDefaultState();
     			if(world.setBlockState(pos, newState, 11)){
-    				if(block instanceof IBlockTileEntity){
+    				if(block instanceof ABlockBaseTileEntity){
     					BuilderTileEntity<TileEntityType> builderTile = (BuilderTileEntity<TileEntityType>) world.getTileEntity(pos);
-    					builderTile.tileEntity = ((IBlockTileEntity<TileEntityType>) block).createTileEntity(this, position, new WrapperNBT());
+    					builderTile.tileEntity = (TileEntityType) ((ABlockBaseTileEntity) block).createTileEntity(this, position, new WrapperNBT());
     				}
     				return true;
     			}
@@ -764,7 +757,7 @@ public class WrapperWorld{
 	
 	/**
 	 *  Updates the brightness of the block at this position.  Only works if the block
-	 *  is a dynamic-brightness block that implements {@link IBlockTileEntity}. 
+	 *  is a dynamic-brightness block that implements {@link ABlockBaseTileEntity}. 
 	 */
 	public void updateLightBrightness(Point3d position){
 		ATileEntityBase<?> tile = getTileEntity(position);

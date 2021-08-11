@@ -93,7 +93,7 @@ public abstract class AEntityE_Multipart<JSONDefinition extends AJSONPartProvide
 			//Don't want crashes due to pack updates.
 			try{
 				WrapperNBT partData = data.getData("part_" + i);
-				AItemPart partItem = PackParserSystem.getItem(partData.getString("packID"), partData.getString("systemName"), partData.getString("subName"));
+				AItemPart partItem = PackParserSystem.getItem(partData);
 				Point3d partOffset = partData.getPoint3d("offset");
 				addPartFromItem(partItem, partData, partOffset, true);
 			}catch(Exception e){

@@ -42,6 +42,7 @@ import minecrafttransportsimulator.jsondefs.JSONSkin;
 import minecrafttransportsimulator.jsondefs.JSONSubDefinition;
 import minecrafttransportsimulator.jsondefs.JSONVehicle;
 import minecrafttransportsimulator.mcinterface.InterfaceCore;
+import minecrafttransportsimulator.mcinterface.WrapperNBT;
 import minecrafttransportsimulator.packloading.JSONParser;
 import minecrafttransportsimulator.packloading.LegacyCompatSystem;
 import minecrafttransportsimulator.packloading.PackResourceLoader.ItemClassification;
@@ -547,6 +548,10 @@ public final class PackParserSystem{
     		return (PackItem) packItemMap.get(packID).get(systemName + subName);
     	}
     	return null;
+    }
+    
+    public static <PackItem extends AItemPack<JSONDefinition>, JSONDefinition extends AJSONItem> PackItem getItem(WrapperNBT data){
+    	return getItem(data.getString("packID"), data.getString("systemName"), data.getString("subName"));
     }
     
     public static boolean arePacksPresent(){
